@@ -5,6 +5,11 @@
 > **Reference:** See `spec.md` for full architectural and design decisions.
 > Update this file as phases are completed and decisions evolve.
 
+### Deployment
+- **Production URL:** https://clinical-routing-assistant.vercel.app/
+- **Hosting:** Vercel (auto-deploys on push to `main`)
+- **Env var:** `ANTHROPIC_API_KEY` set in Vercel for Production, Preview, and Development
+
 ---
 
 ## Development Principles
@@ -345,7 +350,7 @@
 
 | Phase | Description | Status |
 |---|---|---|
-| 0 | Project scaffolding | ⬜ Not started |
+| 0 | Project scaffolding | ✅ Complete |
 | 1 | Types, schemas, SOP data layer | ⬜ Not started |
 | 2 | LLM extraction API route | ⬜ Not started |
 | 3 | Document upload API route | ⬜ Not started |
