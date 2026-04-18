@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { JsonModal } from "@/components/ui/json-modal";
 import { formatSummary } from "@/lib/format-summary";
+import { ruleLabel } from "@/lib/rule-labels";
 import type { RoutingOutput, TriggeredRule } from "@/lib/types";
 import { CheckIcon, ChevronDownIcon, CopyIcon } from "lucide-react";
 
@@ -66,7 +67,7 @@ function RuleCard({ rule }: { rule: TriggeredRule }) {
             {rule.status}
           </Badge>
           <span className="text-xs text-muted-foreground">{rule.category}</span>
-          <span className="ml-auto text-xs text-muted-foreground">{rule.rule_id}</span>
+          <span className="ml-auto text-xs text-muted-foreground">{ruleLabel(rule.rule_id)}</span>
         </div>
         <p className="mt-2 text-sm font-medium">{rule.finding}</p>
         <p className="mt-1 text-sm text-muted-foreground">{rule.action}</p>
@@ -167,7 +168,7 @@ export function Recommendations({ transcript, routing, onBack, onReset }: Props)
                       <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200 uppercase">
                         Needs follow-up
                       </Badge>
-                      <span className="text-xs text-muted-foreground">{f.rule_id}</span>
+                      <span className="text-xs text-muted-foreground">{ruleLabel(f.rule_id)}</span>
                     </div>
                     <p className="mt-2 text-sm">{f.reason}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
