@@ -203,15 +203,18 @@
 **Goal:** Build the server-side API route that accepts a .doc or .docx file upload, extracts the plain text using mammoth.js, and returns the text string for use by the extraction route.
 
 #### Tasks
-- [ ] Create `/app/api/upload-document/route.ts`
-- [ ] Handle multipart form data file upload in Next.js App Router
-- [ ] Use mammoth.js to extract plain text from .doc / .docx
-- [ ] Return extracted text string (or error)
-- [ ] Implement error handling:
-  - Unsupported file type
-  - Empty or corrupted file
-  - Parsing failure
-- [ ] Manual test: upload a .docx version of each sample transcript, verify clean text extraction
+- [x] Create `/app/api/upload-document/route.ts`
+- [x] Handle multipart form data file upload in Next.js App Router (`req.formData()`)
+- [x] Use mammoth.js to extract plain text from .doc / .docx (extension-based gating; mammoth's own errors surface as `parse_failed` rather than pre-rejecting legacy `.doc`)
+- [x] Return extracted text as `{ text: string }` (or typed error)
+- [x] Implement error handling (typed `UploadErrorCode` mapped to HTTP status):
+  - `missing_file` → 400 (no file field or non-multipart body)
+  - `unsupported_type` → 415 (extension not `.doc`/`.docx`)
+  - `empty_file` → 400 (zero-byte upload OR parsed text is whitespace-only)
+  - `parse_failed` → 422 (mammoth throws)
+- [x] Add integration tests in `/tests/integration/upload-document.test.ts` (7 scenarios: valid .docx, valid .doc, missing file, unsupported type, empty file, parse failure, whitespace-only document)
+- [x] All tests pass (81 tests across 5 suites)
+- [x] Manual test: uploaded .docx versions of all 3 sample transcripts (Sarah T, Bob L, Maria V) against the live dev server — text extracted cleanly. Also verified negative paths: unsupported type (415), missing file (400), corrupted .docx (422 `parse_failed`).
 - [ ] Open PR → review → merge to `main`
 
 ---
@@ -357,7 +360,7 @@
 | 0 | Project scaffolding | ✅ Complete |
 | 1 | Types, schemas, SOP data layer | ✅ Complete |
 | 2 | LLM extraction API route | ✅ Complete |
-| 3 | Document upload API route | ⬜ Not started |
+| 3 | Document upload API route | 🟡 In review (code + tests + manual smoke test complete; PR pending) |
 | 4 | Frontend shell + Phase 1 input (centered + samples + disclaimer) | ⬜ Not started |
 | 5 | Frontend Phase 2 extraction review | ⬜ Not started |
 | 6 | Frontend Phase 3 recommendations | ⬜ Not started |
