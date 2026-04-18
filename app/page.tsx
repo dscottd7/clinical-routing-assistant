@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Stepper, type Phase } from "@/components/stepper/stepper";
 import { InputPanel } from "@/components/input/input-panel";
 import { ExtractionReview } from "@/components/extraction-review/extraction-review";
-import { RecommendationsPlaceholder } from "@/components/recommendations/recommendations-placeholder";
+import { Recommendations } from "@/components/recommendations/recommendations";
 import { runSopMatcher } from "@/lib/sop-matcher";
 import type { ExtractionOutput, RoutingOutput } from "@/lib/types";
 
@@ -61,7 +61,7 @@ export default function Home() {
 
       {phase === 3 && extraction && routing && (
         <main className="flex-1 overflow-hidden">
-          <RecommendationsPlaceholder
+          <Recommendations
             transcript={transcript}
             routing={routing}
             onBack={() => setPhase(2)}

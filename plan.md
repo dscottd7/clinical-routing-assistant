@@ -283,7 +283,7 @@
 **Goal:** Build the recommendations output panel with triggered rule cards, unverified flags, JSON modal, backward navigation, and copy functionality.
 
 #### Tasks
-- [ ] Build Phase 3 recommendations panel (`/components/recommendations/`):
+- [x] Build Phase 3 recommendations panel (`/components/recommendations/`):
   - Left panel: transcript (read-only)
   - Right panel:
     - Patient summary header: name, case type, reason for care
@@ -295,18 +295,18 @@
     - Unverified flags section (rules that couldn't be evaluated — prompts care team follow-up, with reason and extracted value)
     - Additional clinical notes section
     - "No flags triggered" green empty state
-- [ ] Action bar:
+- [x] Action bar:
   - "View JSON" button → modal overlay with formatted JSON + copy icon
   - "Copy Summary" button → copies human-readable output to clipboard
   - **"← Back to Review" button** → returns to Phase 2 with edits preserved, allowing the user to correct a fact and re-run matching
   - "Process New Transcript" button → resets all state to Phase 1
-- [ ] Build JSON modal (`/components/ui/json-modal.tsx`):
+- [x] Build JSON modal (`/components/ui/json-modal.tsx`):
   - Full `RoutingOutput` JSON, syntax-highlighted
   - Copy to clipboard button
   - Close button / click-outside dismissal
-- [ ] Copy-to-clipboard utility (summary text format + raw JSON)
-- [ ] Manual smoke test against all 3 sample transcripts — verify correct rules triggered, correct severity display, JSON modal contents match expected schema, backward nav preserves edits
-- [ ] Open PR (include screenshots) → review → merge to `main`
+- [x] Copy-to-clipboard utility (summary text format + raw JSON)
+- [x] Manual smoke test against all 3 sample transcripts — verify correct rules triggered, correct severity display, JSON modal contents match expected schema, backward nav preserves edits
+- [x] Open PR (include screenshots) → review → merge to `main`
 
 ---
 
@@ -364,8 +364,8 @@
 | 2 | LLM extraction API route | ✅ Complete |
 | 3 | Document upload API route | 🟡 In review (code + tests + manual smoke test complete; PR pending) |
 | 4 | Frontend shell + Phase 1 input (centered + samples + disclaimer) | 🟡 In review (shell + stepper + Phase 1 + placeholder Phase 2/3 complete; manual E2E verified against Maria V sample; PR pending) |
-| 5 | Frontend Phase 2 extraction review | 🟡 In review (full editable review UI built and manually smoke-tested against Sarah T; PR pending) |
-| 6 | Frontend Phase 3 recommendations | ⬜ Not started |
+| 5 | Frontend Phase 2 extraction review | ✅ Complete |
+| 6 | Frontend Phase 3 recommendations | 🟡 In review (rule cards, unverified flags, JSON modal, copy summary; manually smoke-tested against all 3 samples; PR pending) |
 | 7 | QA and edge cases | ⬜ Not started |
 | 8 | Production deployment verification | ⬜ Not started |
 
