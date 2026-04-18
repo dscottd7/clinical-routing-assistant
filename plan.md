@@ -315,26 +315,26 @@
 **Goal:** End-to-end testing, edge case hardening, and final UI polish before the demo.
 
 #### Tasks
-- [ ] End-to-end test all 3 sample transcripts — verify the full pipeline produces correct outputs:
+- [x] End-to-end test all 3 sample transcripts — verify the full pipeline produces correct outputs:
   - Sarah T: Revision + Hold + Action Required (bariatric); dental "May" should be `medium` confidence
   - Bob L: High Complexity (opioids) + PT unverified flag ("two sessions at the gym" is ambiguous)
   - Maria V: Deferred (smoking) + Review (HbA1c 7.4); formal PT clears `joint_no_pt`
-- [ ] Test edge cases:
-  - Empty textarea submission
-  - Very short / irrelevant transcript
-  - Transcript with no SOP-triggerable findings (expect clean green state)
-  - File upload of wrong type (expect clear error)
-  - Corrupted / empty .docx (expect clear error)
-  - Edit a fact in Phase 2, go to Phase 3, click "Back to Review," confirm edits persist
-  - Edit HbA1c from 7.4 → 6.9 in Phase 2, apply rules, confirm `joint_hba1c` no longer triggers
-- [ ] Test error recovery: LLM API call failure should allow retry without losing transcript
-- [ ] Verify loading states appear and disappear correctly
-- [ ] Verify stepper accurately reflects current phase and backward navigation works
-- [ ] Verify JSON modal opens/closes, copy works for both summary and JSON
-- [ ] Verify "Process New Transcript" fully resets state
-- [ ] Verify privacy disclaimer is visible on Phase 1 across all layouts/viewports
-- [ ] Cross-browser check (Chrome, Firefox, Safari)
-- [ ] Fix any issues found
+- [x] Test edge cases:
+  - Empty textarea submission (submit button disabled while textarea is empty)
+  - Very short / irrelevant transcript (LLM returns `case_type: unknown`; matcher conservatively flags every rule as unverified — acceptable)
+  - Transcript with no SOP-triggerable findings (green "No flags triggered" state renders)
+  - File upload of wrong type → server responds 415 `unsupported_type` (covered by `tests/integration/upload-document.test.ts`)
+  - Corrupted / empty .docx → server responds 422 `parse_failed` / 400 `empty_file` (covered by same test suite)
+  - Edit a fact in Phase 2, go to Phase 3, click "Back to Review," confirm edits persist (verified with HbA1c edit)
+  - Edit HbA1c from 7.4 → 6.9 in Phase 2, apply rules, confirm `joint_hba1c` no longer triggers (only `joint_smoking` remains)
+- [x] Test error recovery: LLM API call failure should allow retry without losing transcript (code review: `InputPanel.text` state is preserved across the error→retry cycle; `ApiError` caught and surfaced in the alert banner)
+- [x] Verify loading states appear and disappear correctly ("Parsing document…" / "Extracting clinical facts…" observed in prior phases)
+- [x] Verify stepper accurately reflects current phase and backward navigation works (aria-current on active step; clicking a reached step navigates back)
+- [x] Verify JSON modal opens/closes, copy works for both summary and JSON (verified during Phase 6 smoke test)
+- [x] Verify "Process New Transcript" fully resets state (textarea empty, phase and reached back to 1)
+- [x] Verify privacy disclaimer is visible on Phase 1 across all layouts/viewports (always rendered above the Process button)
+- [ ] Cross-browser check (Chrome, Firefox, Safari) — deferred to human verification (Preview harness only drives Chrome)
+- [x] Fix any issues found — none surfaced; no code changes required this phase
 - [ ] Open PR → review → merge to `main`
 
 ---
@@ -365,8 +365,8 @@
 | 3 | Document upload API route | 🟡 In review (code + tests + manual smoke test complete; PR pending) |
 | 4 | Frontend shell + Phase 1 input (centered + samples + disclaimer) | 🟡 In review (shell + stepper + Phase 1 + placeholder Phase 2/3 complete; manual E2E verified against Maria V sample; PR pending) |
 | 5 | Frontend Phase 2 extraction review | ✅ Complete |
-| 6 | Frontend Phase 3 recommendations | 🟡 In review (rule cards, unverified flags, JSON modal, copy summary; manually smoke-tested against all 3 samples; PR pending) |
-| 7 | QA and edge cases | ⬜ Not started |
+| 6 | Frontend Phase 3 recommendations | ✅ Complete |
+| 7 | QA and edge cases | 🟡 In review (edge cases + back-nav edits + HbA1c rerun verified; no regressions; cross-browser deferred; PR pending) |
 | 8 | Production deployment verification | ⬜ Not started |
 
 ---
