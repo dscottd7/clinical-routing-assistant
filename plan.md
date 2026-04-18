@@ -351,7 +351,7 @@
 | Phase | Description | Status |
 |---|---|---|
 | 0 | Project scaffolding | ✅ Complete |
-| 1 | Types, schemas, SOP data layer | ⬜ Not started |
+| 1 | Types, schemas, SOP data layer | ✅ Complete |
 | 2 | LLM extraction API route | ⬜ Not started |
 | 3 | Document upload API route | ⬜ Not started |
 | 4 | Frontend shell + Phase 1 input (centered + samples + disclaimer) | ⬜ Not started |
@@ -362,7 +362,15 @@
 
 ---
 
+## Planned Enhancements (Post-v1)
+
+- **Surface LLM evidence in `UnverifiedFlag`.** Today the matcher builds a deterministic `reason` string from field labels but discards the LLM `evidence` quote when a fact's `value` is `null`. Carrying that quote through (appended to `reason`, or as a new optional `evidence` field) would let reviewers see *why* the LLM was uncertain — e.g., "I went to the gym a couple of times" alongside the `joint_no_pt` flag. See spec Section 9b.
+
+---
+
 ## Sample Transcript Expected Outputs (Reference)
+
+> ⚠️ **The sample transcripts in `/lib/sample-transcripts.ts` must not be modified.** They are the fixed evaluation set. If a sample appears to defeat a planned test case, update the expected output below — never edit the transcript. See spec Section 9a.
 
 Use these to validate correctness throughout development. The same three samples are pre-loaded into the Phase 1 dropdown.
 

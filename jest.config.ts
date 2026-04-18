@@ -7,8 +7,9 @@ const createJestConfig = nextJest({
 });
 
 const config: Config = {
-  // Set up @testing-library/jest-dom matchers.
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  // Set up @testing-library/jest-dom matchers for component tests.
+  // NOTE: requires Node 22+ (see .nvmrc). Jest 30 does not support Node 16.
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 
   // jsdom for component tests; individual files can override with a docblock if they need node.
   testEnvironment: 'jsdom',
