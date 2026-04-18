@@ -8,7 +8,8 @@
         "-c",
         "export NVM_DIR=\"$HOME/.nvm\" && source \"$NVM_DIR/nvm.sh\" && nvm use 22 >/dev/null && unset ANTHROPIC_API_KEY ANTHROPIC_BASE_URL && npm run dev"
       ],
-      "port": 3000
+      "port": 3000,
+      "autoPort": true
     }
   ]
 }

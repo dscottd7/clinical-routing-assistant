@@ -1,3 +1,4 @@
+import { ruleLabel } from "./rule-labels";
 import type { RoutingOutput } from "./types";
 
 function caseTypeLabel(caseType: string): string {
@@ -40,7 +41,7 @@ export function formatSummary(routing: RoutingOutput): string {
     lines.push("");
     lines.push("Unverified flags (needs care-team follow-up):");
     for (const f of routing.unverified_flags) {
-      lines.push(`  - ${f.rule_id}: ${f.reason}`);
+      lines.push(`  - ${ruleLabel(f.rule_id)}: ${f.reason}`);
       lines.push(`      Extracted: ${f.extracted_value} (confidence: ${f.confidence})`);
     }
   }

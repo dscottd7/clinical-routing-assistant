@@ -5,14 +5,74 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { JsonModal } from "@/components/ui/json-modal";
 import { formatSummary } from "@/lib/format-summary";
-import type { RoutingOutput, TriggeredRule } from "@/lib/types";
+import { ruleLabel } from "@/lib/rule-labels";
+import type { ExtractionOutput, RoutingOutput, TriggeredRule } from "@/lib/types";
 import { CheckIcon, ChevronDownIcon, CopyIcon } from "lucide-react";
 
 interface Props {
   transcript: string;
+  extraction: ExtractionOutput;
   routing: RoutingOutput;
   onBack: () => void;
   onReset: () => void;
+}
+
+const BOOL_LABELS: Record<string, string> = {
+  dental_visit_within_6_months: "Dental visit within last 6 months",
+  has_pending_dental_work: "Pending dental work",
+  has_attempted_pt_or_exercise: "Attempted PT or structured exercise",
+  daily_opioid_use_over_3_months: "Daily opioid use > 3 months",
+  has_prior_weight_loss_surgery: "Prior weight-loss surgery",
+  has_recent_endoscopy: "Recent endoscopy (within 3 months)",
+  has_registered_dietician: "Registered dietician identified",
+};
+
+const SMOKING_LABELS: Record<string, string> = {
+  active: "Active",
+  quit_within_3_months: "Quit within last 3 months",
+  quit_over_3_months: "Quit over 3 months ago",
+  never: "Never",
+};
+
+const FACT_SECTIONS: { title: string; fields: (keyof ExtractionOutput["facts"])[] }[] = [
+  {
+    title: "General",
+    fields: ["dental_visit_within_6_months", "has_pending_dental_work"],
+  },
+  {
+    title: "Joint",
+    fields: [
+      "has_attempted_pt_or_exercise",
+      "smoking_status",
+      "hba1c_value",
+      "daily_opioid_use_over_3_months",
+    ],
+  },
+  {
+    title: "Bariatric",
+    fields: [
+      "has_prior_weight_loss_surgery",
+      "prior_surgery_type",
+      "has_recent_endoscopy",
+      "has_registered_dietician",
+    ],
+  },
+];
+
+function formatFactValue(field: keyof ExtractionOutput["facts"], value: unknown): string {
+  if (value === null || value === undefined) return "Not mentioned";
+  if (field === "smoking_status" && typeof value === "string") {
+    return SMOKING_LABELS[value] ?? value;
+  }
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  return String(value);
+}
+
+function factLabel(field: keyof ExtractionOutput["facts"]): string {
+  if (field === "smoking_status") return "Smoking status";
+  if (field === "hba1c_value") return "HbA1c value";
+  if (field === "prior_surgery_type") return "Prior surgery type";
+  return BOOL_LABELS[field] ?? field;
 }
 
 const SEVERITY_STYLES: Record<
@@ -66,7 +126,7 @@ function RuleCard({ rule }: { rule: TriggeredRule }) {
             {rule.status}
           </Badge>
           <span className="text-xs text-muted-foreground">{rule.category}</span>
-          <span className="ml-auto text-xs text-muted-foreground">{rule.rule_id}</span>
+          <span className="ml-auto text-xs text-muted-foreground">{ruleLabel(rule.rule_id)}</span>
         </div>
         <p className="mt-2 text-sm font-medium">{rule.finding}</p>
         <p className="mt-1 text-sm text-muted-foreground">{rule.action}</p>
@@ -92,9 +152,10 @@ function RuleCard({ rule }: { rule: TriggeredRule }) {
   );
 }
 
-export function Recommendations({ transcript, routing, onBack, onReset }: Props) {
+export function Recommendations({ transcript, extraction, routing, onBack, onReset }: Props) {
   const [jsonOpen, setJsonOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [factsOpen, setFactsOpen] = useState(false);
 
   async function handleCopySummary() {
     try {
@@ -132,6 +193,49 @@ export function Recommendations({ transcript, routing, onBack, onReset }: Props)
           </header>
 
           <div>
+            <button
+              type="button"
+              onClick={() => setFactsOpen((o) => !o)}
+              className="flex w-full items-center justify-between rounded-md border bg-card px-3 py-2 text-left text-sm hover:bg-muted/50"
+              aria-expanded={factsOpen}
+            >
+              <span className="font-semibold uppercase tracking-wide text-muted-foreground text-xs">
+                Extracted facts
+              </span>
+              <ChevronDownIcon
+                className={`h-4 w-4 transition-transform ${factsOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            {factsOpen && (
+              <div className="mt-3 space-y-4">
+                {FACT_SECTIONS.map((section) => (
+                  <div key={section.title}>
+                    <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {section.title}
+                    </h4>
+                    <dl className="divide-y rounded-md border bg-card text-sm">
+                      {section.fields.map((field) => {
+                        const fact = extraction.facts[field];
+                        return (
+                          <div
+                            key={field}
+                            className="flex items-baseline justify-between gap-3 px-3 py-1.5"
+                          >
+                            <dt className="text-muted-foreground">{factLabel(field)}</dt>
+                            <dd className="font-medium">
+                              {formatFactValue(field, fact.value)}
+                            </dd>
+                          </div>
+                        );
+                      })}
+                    </dl>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
             <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Triggered Rules
             </h3>
@@ -167,7 +271,7 @@ export function Recommendations({ transcript, routing, onBack, onReset }: Props)
                       <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200 uppercase">
                         Needs follow-up
                       </Badge>
-                      <span className="text-xs text-muted-foreground">{f.rule_id}</span>
+                      <span className="text-xs text-muted-foreground">{ruleLabel(f.rule_id)}</span>
                     </div>
                     <p className="mt-2 text-sm">{f.reason}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
@@ -211,7 +315,7 @@ export function Recommendations({ transcript, routing, onBack, onReset }: Props)
         </div>
       </section>
 
-      <JsonModal open={jsonOpen} onOpenChange={setJsonOpen} data={routing} />
+      <JsonModal open={jsonOpen} onOpenChange={setJsonOpen} data={{ extraction, routing }} />
     </div>
   );
 }

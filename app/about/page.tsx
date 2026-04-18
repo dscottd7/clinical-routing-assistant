@@ -71,7 +71,10 @@ export default function AboutPage() {
                 </div>
                 A pure, deterministic TypeScript function evaluates each SOP rule
                 against the (now-verified) facts and produces a routing output —
-                triggered rules, unverified flags, and additional notes.
+                triggered rules, unverified flags, and additional notes. The page
+                also surfaces the full extracted-fact table (collapsed by default)
+                so the reviewer can see the evidence base behind the routing, not
+                just the rules that fired.
               </li>
             </ol>
           </section>
@@ -193,6 +196,29 @@ export default function AboutPage() {
               Unverified is the interesting bucket — it means the transcript didn&apos;t
               contain the information the rule needs. The reviewer either fills it in
               (and re-runs matching) or escalates to the care team.
+            </p>
+          </section>
+
+          <section id="export">
+            <h2 className="mb-3 text-xl font-semibold">What the care team gets</h2>
+            <p className="mb-3">
+              Phase 3 exposes two outputs. A human-readable summary that can be
+              copied straight into a chart note, and a{" "}
+              <strong>&ldquo;View JSON&rdquo;</strong> modal that exports a single
+              validated payload:
+            </p>
+            <pre className="overflow-x-auto rounded-md border bg-muted/50 p-3 font-mono text-xs">
+{`{
+  "extraction": { /* every fact + confidence + evidence, including nulls */ },
+  "routing":    { /* triggered rules, unverified flags, additional notes */ }
+}`}
+            </pre>
+            <p className="mt-3">
+              The case-study brief asks for &ldquo;a validated JSON object
+              containing the extracted facts and the suggested next steps.&rdquo;
+              Bundling both schemas in one payload answers both halves of that
+              question — what the model saw, and what should happen next — without
+              conflating them into a single flat shape.
             </p>
           </section>
 
