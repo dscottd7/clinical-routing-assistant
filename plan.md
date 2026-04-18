@@ -351,7 +351,7 @@
 | Phase | Description | Status |
 |---|---|---|
 | 0 | Project scaffolding | ✅ Complete |
-| 1 | Types, schemas, SOP data layer | ⬜ Not started |
+| 1 | Types, schemas, SOP data layer | ✅ Complete |
 | 2 | LLM extraction API route | ⬜ Not started |
 | 3 | Document upload API route | ⬜ Not started |
 | 4 | Frontend shell + Phase 1 input (centered + samples + disclaimer) | ⬜ Not started |
