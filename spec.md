@@ -454,6 +454,24 @@ Step 2 is deterministic code. SOP matching logic is implemented as a pure functi
 
 ---
 
+## 9a. Sample Transcripts — Immutable
+
+The three pre-loaded sample transcripts in `/lib/sample-transcripts.ts` (Sarah T, Bob L, Maria V) **must not be modified** under any circumstances. They are the fixed evaluation set used to validate the end-to-end pipeline against the expected outputs documented in `plan.md` ("Sample Transcript Expected Outputs").
+
+If a sample appears to "defeat" a planned test case (for example, the Bob L transcript currently states "He has not undergone any formal physical therapy program," which would cause the LLM to extract `has_attempted_pt_or_exercise: false` rather than `null` — clearing `joint_no_pt` instead of producing the intended unverified flag), the resolution is to update the expected output in `plan.md` and document the behavior, **never** to edit the transcript text.
+
+---
+
+## 9b. Planned Enhancement — LLM Evidence in Unverified Flags
+
+`UnverifiedFlag` currently surfaces a deterministic `reason` string built from field labels (e.g., "physical therapy or exercise history not mentioned in transcript"). The richer **`evidence`** quote captured by the LLM during extraction (e.g., "I went to the gym a couple of times") is dropped on the floor when the field's `value` is `null`.
+
+**Enhancement (post-v1):** Carry the LLM `evidence` quote through to `UnverifiedFlag` — either appended to `reason` or as a new optional `evidence: string | null` field — so the reviewer sees *why* the LLM was uncertain, not just *that* it was uncertain. This materially improves the human-review loop for ambiguous facts (which is the entire purpose of the unverified bucket) without changing the deterministic matching behavior.
+
+Tracked here so it's not lost; not in scope for the current phase.
+
+---
+
 ## 10. Out of Scope for v1
 
 - Data persistence / session history

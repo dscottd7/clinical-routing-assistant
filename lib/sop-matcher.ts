@@ -152,10 +152,9 @@ export function runSopMatcher(
   const unverifiedFlags: UnverifiedFlag[] = [];
 
   for (const rule of rules) {
-    // Skip rules that don't apply to this case type
-    if (caseType && !rule.applies_to.includes(caseType)) continue;
-    // If case type is unknown, apply all rules
-    // If case type is null, apply all rules (same as unknown)
+    // Skip rules that don't apply. "unknown" and null both mean "case type not
+    // established" — apply all rules so nothing is silently skipped.
+    if (caseType && caseType !== "unknown" && !rule.applies_to.includes(caseType)) continue;
 
     // Find which fact fields are null
     const nullFields = rule.fact_fields.filter((field) => {
@@ -163,55 +162,7 @@ export function runSopMatcher(
       return fact === null || fact.value === null;
     });
 
-    // Special handling for general_dental: can trigger on partial evidence
-    if (rule.id === "general_dental") {
-      const dentalVisit = extraction.facts.dental_visit_within_6_months;
-      const pendingWork = extraction.facts.has_pending_dental_work;
-
-      const dentalVisitNull = dentalVisit.value === null;
-      const pendingWorkNull = pendingWork.value === null;
-
-      // If either is definitively triggering, we can fire without needing both
-      if (!pendingWorkNull && pendingWork.value === true) {
-        triggeredRules.push({
-          rule_id: rule.id,
-          category: rule.category,
-          finding: rule.finding,
-          status: rule.status,
-          action: rule.action,
-          severity: rule.severity,
-          evidence: pendingWork.evidence,
-        });
-        continue;
-      }
-      if (!dentalVisitNull && dentalVisit.value === false) {
-        triggeredRules.push({
-          rule_id: rule.id,
-          category: rule.category,
-          finding: rule.finding,
-          status: rule.status,
-          action: rule.action,
-          severity: rule.severity,
-          evidence: dentalVisit.evidence,
-        });
-        continue;
-      }
-      // If both are non-null and neither triggers, it's a clear
-      if (!dentalVisitNull && !pendingWorkNull) {
-        continue;
-      }
-      // At least one is null and neither triggered definitively → unverified
-      const primaryFact = dentalVisitNull ? dentalVisit : pendingWork;
-      unverifiedFlags.push({
-        rule_id: rule.id,
-        reason: buildUnverifiedReason(rule, nullFields, extraction),
-        extracted_value: formatExtractedValue(rule, extraction),
-        confidence: primaryFact.confidence,
-      });
-      continue;
-    }
-
-    // Standard three-way classification for all other rules
+    // Three-way classification per spec Section 4: any null fact field → unverified.
     if (nullFields.length > 0) {
       // Determine which non-null fact field to use for confidence reporting
       const representativeFact = getFactField(

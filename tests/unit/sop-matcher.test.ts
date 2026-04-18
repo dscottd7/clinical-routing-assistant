@@ -144,6 +144,20 @@ describe("Category filtering", () => {
     expectTriggered(output, "joint_smoking");
     expectTriggered(output, "bariatric_revision");
   });
+
+  it("applies all rules when case_type is 'unknown'", () => {
+    const extraction = baseExtraction({
+      case_type: fact("unknown"),
+      facts: {
+        ...baseExtraction().facts,
+        smoking_status: fact("active"),
+        has_prior_weight_loss_surgery: fact(true),
+      },
+    });
+    const output = runSopMatcher(extraction);
+    expectTriggered(output, "joint_smoking");
+    expectTriggered(output, "bariatric_revision");
+  });
 });
 
 // ── general_dental ────────────────────────────────────────────────────────────
@@ -193,7 +207,9 @@ describe("general_dental", () => {
     expectUnverified(runSopMatcher(extraction), "general_dental");
   });
 
-  it("still triggers when dental_visit is null but pending_work is true", () => {
+  it("marks unverified when either dental field is null, even if the other would trigger", () => {
+    // Per spec Section 4: any null fact field → unverified. The matcher does not
+    // try to short-circuit to a trigger when the other field is satisfying.
     const extraction = baseExtraction({
       facts: {
         ...baseExtraction().facts,
@@ -201,7 +217,7 @@ describe("general_dental", () => {
         has_pending_dental_work: fact(true),
       },
     });
-    expectTriggered(runSopMatcher(extraction), "general_dental");
+    expectUnverified(runSopMatcher(extraction), "general_dental");
   });
 });
 
