@@ -339,7 +339,31 @@
 
 ---
 
-### Phase 8 — Production Deployment Verification
+### Phase 8 — About / How It Works Page
+**Branch:** `feature/about-page`
+**Goal:** A static `/about` page that explains what the app does, how it works, and the design choices. Supports live presentation and shareable links.
+
+#### Tasks
+- [x] Create `app/about/page.tsx` (server component) with sections:
+  - Hero — one-sentence pitch
+  - The problem (manual SOP triage)
+  - How it works — the three-phase pipeline (Input → Extraction → SOP Matching → Recommendations)
+  - Design choice: LLM extraction + deterministic matcher (why the rule engine is not an LLM call)
+  - The fact model — `ExtractedFact<T>` with `value / confidence / evidence`, and "not mentioned" as first-class
+  - SOP rule example — one rule (e.g. `joint_smoking`) as JSON + plain-English explanation
+  - Triggered / Unverified / Cleared classification table
+  - Confidence & review workflow — reviewer edits re-promote confidence to `high`
+  - Limitations & privacy (synthetic-only, no PHI, no audit log, no persistence)
+  - Tech stack (Next.js 16, Claude Sonnet 4.6, Zod, Jest, Tailwind + base-ui)
+- [x] Add "About this demo" link in the stepper header (or equivalent top-bar surface) on the main app
+- [x] Add "← Back to app" link from `/about`
+- [x] Section anchors for deep-linking during a presentation
+- [x] Manual smoke test — open `/about`, verify styling, anchor nav, back link
+- [x] Open PR → review → merge to `main`
+
+---
+
+### Phase 9 — Production Deployment Verification
 **Branch:** `chore/production-verification`
 **Goal:** Confirm the production Vercel deployment works end-to-end, environment variables are set correctly, and the app is ready to share.
 
@@ -350,6 +374,7 @@
 - [ ] Confirm file upload works in production (not just local)
 - [ ] Confirm JSON modal and copy functionality work in production
 - [ ] Confirm backward nav (Phase 3 → Phase 2) works in production
+- [ ] Confirm `/about` page renders in production
 - [ ] Note the production URL for sharing
 - [ ] Open PR → merge → done
 
@@ -362,12 +387,13 @@
 | 0 | Project scaffolding | ✅ Complete |
 | 1 | Types, schemas, SOP data layer | ✅ Complete |
 | 2 | LLM extraction API route | ✅ Complete |
-| 3 | Document upload API route | 🟡 In review (code + tests + manual smoke test complete; PR pending) |
-| 4 | Frontend shell + Phase 1 input (centered + samples + disclaimer) | 🟡 In review (shell + stepper + Phase 1 + placeholder Phase 2/3 complete; manual E2E verified against Maria V sample; PR pending) |
+| 3 | Document upload API route | ✅ Complete |
+| 4 | Frontend shell + Phase 1 input (centered + samples + disclaimer) | ✅ Complete |
 | 5 | Frontend Phase 2 extraction review | ✅ Complete |
 | 6 | Frontend Phase 3 recommendations | ✅ Complete |
-| 7 | QA and edge cases | 🟡 In review (edge cases + back-nav edits + HbA1c rerun verified; no regressions; cross-browser deferred; PR pending) |
-| 8 | Production deployment verification | ⬜ Not started |
+| 7 | QA and edge cases | ✅ Complete |
+| 8 | About / How It Works page | 🟡 In review (`/about` route + header link + back link; manually smoke-tested; PR pending) |
+| 9 | Production deployment verification | ⬜ Not started |
 
 ---
 

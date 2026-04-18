@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export type Phase = 1 | 2 | 3;
@@ -18,7 +19,13 @@ interface StepperProps {
 
 export function Stepper({ current, reached, onNavigate }: StepperProps) {
   return (
-    <nav aria-label="Progress" className="border-b bg-background px-6 py-4">
+    <nav aria-label="Progress" className="relative border-b bg-background px-6 py-4">
+      <Link
+        href="/about"
+        className="absolute right-6 top-1/2 hidden -translate-y-1/2 text-sm text-muted-foreground hover:text-foreground sm:block"
+      >
+        About this demo
+      </Link>
       <ol className="mx-auto flex max-w-5xl items-center justify-center gap-2 sm:gap-4">
         {STEPS.map((step, idx) => {
           const isActive = step.phase === current;
