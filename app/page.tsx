@@ -63,6 +63,7 @@ export default function Home() {
         <main className="flex-1 overflow-hidden">
           <Recommendations
             transcript={transcript}
+            extraction={extraction}
             routing={routing}
             onBack={() => setPhase(2)}
             onReset={handleReset}
