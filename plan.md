@@ -74,20 +74,20 @@
 **Goal:** Establish a working, deployable Next.js skeleton with all dependencies installed and configuration in place before any feature work begins.
 
 #### Tasks
-- [ ] Initialize Next.js app with TypeScript and App Router (`npx create-next-app@latest`)
-- [ ] Configure ESLint and Prettier
-- [ ] Install dependencies:
+- [x] Initialize Next.js app with TypeScript and App Router (`npx create-next-app@latest`)
+- [x] Configure ESLint and Prettier
+- [x] Install dependencies:
   - `@anthropic-ai/sdk` — Claude API client
   - `mammoth` — .doc / .docx text extraction
   - `zod` — runtime schema validation for LLM output
   - `jest`, `@testing-library/react`, `@testing-library/jest-dom` — testing
-- [ ] Set up directory structure (see below)
-- [ ] Create `.env.example` with `ANTHROPIC_API_KEY=` (no value)
-- [ ] Create `.env.local` locally with real API key (gitignored)
-- [ ] Confirm dev server runs locally (`npm run dev`)
-- [ ] Connect repo to Vercel, confirm auto-deploy from `main` works
-- [ ] Confirm environment variable is set in Vercel project settings
-- [ ] Open PR → review → merge to `main`
+- [x] Set up directory structure (see below)
+- [x] Create `.env.example` with `ANTHROPIC_API_KEY=` (no value)
+- [x] Create `.env.local` locally with real API key (gitignored)
+- [x] Confirm dev server runs locally (`npm run dev`)
+- [x] Connect repo to Vercel, confirm auto-deploy from `main` works
+- [x] Confirm environment variable is set in Vercel project settings
+- [x] Open PR → review → merge to `main`
 
 #### Directory Structure
 ```
@@ -124,24 +124,25 @@
 **Goal:** Define all TypeScript types, Zod validation schemas, the SOP rules array, and the three-way matching function before any API or UI work. This is the contract everything else is built against.
 
 #### Tasks
-- [ ] Implement TypeScript types in `/lib/types.ts`:
+- [x] Implement TypeScript types in `/lib/types.ts`:
   - `Confidence`, `CaseType`, `SmokingStatus`, `ExtractedFact<T>`, `ExtractionOutput`
   - `TriggeredRule`, `UnverifiedFlag`, `RoutingOutput`
   - `SopRule` (the shape of each rule in the rules array)
-- [ ] Implement Zod schemas in `/lib/schemas.ts` that mirror the TypeScript types (used to validate LLM tool input at runtime)
-- [ ] Implement SOP rules array in `/lib/sop-rules.ts` (all 8 rules from spec Section 4, using the simplified fact fields: `smoking_status` enum, `has_attempted_pt_or_exercise`, `hba1c_value` only — no derived boolean)
-- [ ] Implement deterministic matching function in `/lib/sop-matcher.ts`:
+- [x] Implement Zod schemas in `/lib/schemas.ts` that mirror the TypeScript types (used to validate LLM tool input at runtime)
+- [x] Implement SOP rules array in `/lib/sop-rules.ts` (all 8 rules from spec Section 4, using the simplified fact fields: `smoking_status` enum, `has_attempted_pt_or_exercise`, `hba1c_value` only — no derived boolean)
+- [x] Implement deterministic matching function in `/lib/sop-matcher.ts`:
   - Input: `ExtractionOutput`, `SopRule[]`
   - Output: `RoutingOutput`
-  - Filters rules by case type
+  - Filters rules by case type (`null` and `"unknown"` both apply all rules)
   - **Three-way classification per rule:**
     - Any referenced fact field is `null` → push to `unverified_flags` with a human-readable `reason`
     - All fields non-null AND trigger condition satisfied → push to `triggered_rules`
     - All fields non-null AND trigger condition NOT satisfied → omit (silent clear)
   - Derive `hba1c > 7.0` from `hba1c_value` inside the matcher (not from a separate boolean)
   - Map `smoking_status` values (`"active"`, `"quit_within_3_months"`) to trigger; other values clear the rule
-- [ ] Populate `/lib/sample-transcripts.ts` with 3 pre-loaded sample transcripts (Sarah T, Bob L, Maria V), each exported with a display label and body text
-- [ ] Write unit tests in `/tests/unit/sop-matcher.test.ts`:
+  - Triggered rules sorted by severity (critical → high → warning → info)
+- [x] Populate `/lib/sample-transcripts.ts` with 3 pre-loaded sample transcripts (Sarah T, Bob L, Maria V), each exported with a display label and body text
+- [x] Write unit tests in `/tests/unit/sop-matcher.test.ts`:
   - Test each of the 8 rules individually with triggered / cleared / unverified cases (24 scenarios minimum)
   - Test that category filtering works (Joint rules don't fire for Bariatric cases and vice versa)
   - Test multi-rule scenarios (patient triggers 2+ rules simultaneously)
@@ -149,12 +150,14 @@
   - Test `smoking_status` enum mapping: `active` triggers, `quit_within_3_months` triggers, `quit_over_3_months` clears, `never` clears, `null` → unverified
   - Test HbA1c edge cases: `7.0` does not trigger (strict `>`), `7.01` triggers, `null` → unverified
   - Test clean patient (no rules triggered) produces empty `triggered_rules` and empty `unverified_flags`
-- [ ] Write unit tests in `/tests/unit/schemas.test.ts`:
+  - Test `case_type` of `null` and `"unknown"` apply all rules
+- [x] Write unit tests in `/tests/unit/schemas.test.ts`:
   - Valid extraction output passes schema validation
   - Missing required fields are caught
   - Wrong types are caught (e.g., string where enum expected)
   - `smoking_status` rejects values not in the enum
-- [ ] All tests pass
+- [x] All tests pass (65 tests across 3 suites)
+- [x] Set up Jest config (`jest.config.ts`, `jest.setup.js`) with `next/jest`, jsdom, and `@/*` path alias; requires Node 22 (see `.nvmrc`)
 - [ ] Open PR → review → merge to `main`
 
 ---
