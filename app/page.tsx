@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Stepper, type Phase } from "@/components/stepper/stepper";
 import { InputPanel } from "@/components/input/input-panel";
-import { ExtractionReviewPlaceholder } from "@/components/extraction-review/extraction-review-placeholder";
+import { ExtractionReview } from "@/components/extraction-review/extraction-review";
 import { RecommendationsPlaceholder } from "@/components/recommendations/recommendations-placeholder";
 import { runSopMatcher } from "@/lib/sop-matcher";
 import type { ExtractionOutput, RoutingOutput } from "@/lib/types";
@@ -49,9 +49,10 @@ export default function Home() {
 
       {phase === 2 && extraction && (
         <main className="flex-1 overflow-hidden">
-          <ExtractionReviewPlaceholder
+          <ExtractionReview
             transcript={transcript}
             extraction={extraction}
+            onChange={setExtraction}
             onApply={() => goTo(3)}
             onBack={() => setPhase(1)}
           />

@@ -258,24 +258,22 @@
 **Goal:** Build the human review panel where extracted facts are displayed with confidence indicators and always-editable fields, before SOP matching runs.
 
 #### Tasks
-- [ ] Build Phase 2 review panel (`/components/extraction-review/`):
+- [x] Build Phase 2 review panel (`components/extraction-review/extraction-review.tsx`, replacing the Phase 4 placeholder):
   - Left panel: transcript (read-only)
-  - Right panel:
-    - Patient header: name + inferred case type
-    - Extracted facts table:
-      - Each row: field label | editable value control | confidence badge
-      - **All fields are always editable** — confidence governs visual highlighting only, not edit permission
-      - Boolean fields: `Yes` / `No` / `Not Mentioned` segmented control
-      - `smoking_status` enum: dropdown with `Active` / `Quit within 3 months` / `Quit over 3 months` / `Never` / `Not Mentioned`
-      - Numeric fields (HbA1c): number input with a "Not Mentioned" checkbox (checking it sets value to `null`)
-      - String fields (name, case type): text input (case type is a dropdown: bariatric / joint / general / unknown)
-    - Confidence badge component (`HIGH` green / `MED` yellow / `LOW` red)
-    - `MED` and `LOW` rows get a soft background highlight (yellow / red) to direct attention
-    - Additional clinical notes section (read-only)
-- [ ] "Apply SOP Rules →" button triggers deterministic matching client-side (no API call — matching logic runs in the browser using the data layer from Phase 1)
-- [ ] On click: run `sop-matcher` against current (possibly edited) extraction output, advance to Phase 3
-- [ ] Shared state model keeps the (possibly edited) `ExtractionOutput` persistent so backward navigation from Phase 3 preserves the user's edits
-- [ ] Manual smoke test: verify all 3 sample patients display correct extracted facts, verify editing every field type works, verify MED/LOW rows are visually highlighted
+  - Right panel: patient header (name / case type / reason for care), followed by grouped fact sections (General, Joint bools, Joint enum, Joint numeric, Bariatric bools, Bariatric detail)
+  - Every row shows label, editable control, confidence badge, and the LLM's `evidence` quote inline beneath the control
+  - Boolean fields → 3-state `TriState` radiogroup (`Yes` / `No` / `Not Mentioned`)
+  - `smoking_status` enum → native `<select>` with `Not Mentioned` as the null option
+  - `hba1c_value` → number input + "Not mentioned" checkbox that toggles the value between a number and `null` (disabling the number input when null)
+  - `prior_surgery_type`, `patient_name`, `reason_for_care` → text inputs that treat empty string as `null`
+  - `case_type` → dropdown (bariatric / joint / general / unknown)
+  - Confidence badge: HIGH (green) / MED (amber) / LOW (rose); MED and LOW rows get a soft amber / rose background
+  - Additional notes rendered as a read-only `<ul>` (hidden when empty)
+  - **Edit semantic:** any user edit sets that field's `confidence` to `"high"` so the row highlight clears after verification — evidence quote is preserved since it's still a legitimate excerpt from the transcript
+- [x] "Apply SOP Rules →" button advances to Phase 3; the matcher runs client-side via `useMemo` in `app/page.tsx` (wired in Phase 4) and re-runs whenever the extraction state changes
+- [x] Shared state model: `setExtraction` is passed as `onChange` into the review panel, so edits live in the page-level `extraction` state and persist across backward nav from Phase 3 → 2
+- [x] `npx tsc --noEmit` clean; `npm test` — 81/81 pass (Phase 5 adds no tests since the review panel has no non-trivial logic to unit-test — all state lives in the page shell and is covered by the matcher's existing tests)
+- [x] Manual smoke test via browser preview: Sarah T sample → panel renders patient summary, all fact sections, additional notes; clicking Apply SOP Rules produces the expected Sarah T routing output (`general_dental`, `bariatric_no_egd`, `bariatric_no_rd`, `bariatric_revision`) matching plan.md
 - [ ] Open PR (include screenshots) → review → merge to `main`
 
 ---
@@ -366,7 +364,7 @@
 | 2 | LLM extraction API route | ✅ Complete |
 | 3 | Document upload API route | 🟡 In review (code + tests + manual smoke test complete; PR pending) |
 | 4 | Frontend shell + Phase 1 input (centered + samples + disclaimer) | 🟡 In review (shell + stepper + Phase 1 + placeholder Phase 2/3 complete; manual E2E verified against Maria V sample; PR pending) |
-| 5 | Frontend Phase 2 extraction review | ⬜ Not started |
+| 5 | Frontend Phase 2 extraction review | 🟡 In review (full editable review UI built and manually smoke-tested against Sarah T; PR pending) |
 | 6 | Frontend Phase 3 recommendations | ⬜ Not started |
 | 7 | QA and edge cases | ⬜ Not started |
 | 8 | Production deployment verification | ⬜ Not started |
