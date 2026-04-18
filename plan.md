@@ -55,7 +55,7 @@
 
 ### Documentation
 - Update `spec.md` when any architectural or design decision changes
-- Update `plan.md` to mark phases complete as work is finished
+- **Update `plan.md` as part of every commit** — before committing any phase work, tick off the task checkboxes that shipped in that commit, update the phase-completion tracker, and note any deviations from the original plan (e.g., a chosen HTTP status code, an added sub-task). Treat it as a build step, not an afterthought: a commit that advances the work without updating `plan.md` is incomplete.
 - Add inline comments for non-obvious logic, especially in the SOP matching engine and LLM prompts
 
 ### Code Quality
@@ -167,33 +167,34 @@
 **Goal:** Build the server-side API route that takes a transcript string, calls the Claude API with `tool_use` structured output, validates the response, and returns an `ExtractionOutput` object.
 
 #### Tasks
-- [ ] Create `/app/api/process-transcript/route.ts`
-- [ ] Set up Anthropic client using `ANTHROPIC_API_KEY` from environment
-- [ ] Pin model to `claude-sonnet-4-5`
-- [ ] Design extraction system prompt (see spec Section 7):
+- [x] Create `/app/api/process-transcript/route.ts`
+- [x] Set up Anthropic client using `ANTHROPIC_API_KEY` from environment
+- [x] Pin model to `claude-sonnet-4-5`
+- [x] Design extraction system prompt (see spec Section 7):
   - Role: clinical data extraction assistant only — not a decision-maker
   - Instructions: extract only what is stated, use `null` for anything not mentioned, never assume
   - Confidence level definitions with examples
   - **Temporal ambiguity guidance:** vague dates/timing → still infer but drop confidence to `medium` and include the vague phrase in `evidence`
+  - **Bare-month convention:** a past month name with no year is assumed to be the most recent occurrence (within the prior 12 months), at `medium` confidence
   - Additional notes instructions for non-SOP clinical findings
-- [ ] Define `record_extraction` tool whose `input_schema` mirrors the `ExtractionOutput` JSON structure
-- [ ] Call Claude with `tool_choice: { type: "tool", name: "record_extraction" }` to force structured output
-- [ ] Parse tool input from the response
-- [ ] Validate response against Zod schema — reject malformed output
-- [ ] Return validated `ExtractionOutput` JSON (or error with appropriate HTTP status)
-- [ ] Implement error handling:
-  - API key missing / invalid
-  - Claude API timeout or failure
-  - Model returned a non-tool-use stop reason (defensive)
-  - Schema validation failure
-- [ ] Write integration tests in `/tests/integration/process-transcript.test.ts`:
-  - Mock Claude API tool_use responses
+- [x] Define `record_extraction` tool whose `input_schema` mirrors the `ExtractionOutput` JSON structure
+- [x] Call Claude with `tool_choice: { type: "tool", name: "record_extraction" }` to force structured output
+- [x] Parse tool input from the response
+- [x] Validate response against Zod schema — reject malformed output
+- [x] Return validated `ExtractionOutput` JSON (or error with appropriate HTTP status)
+- [x] Implement error handling (typed `ExtractionError` codes mapped to HTTP status: 400 / 422 / 500 / 502):
+  - API key missing / invalid → 500 `missing_api_key`
+  - Claude API timeout or failure → 502 `api_error`
+  - Model returned a non-tool-use stop reason → 502 `no_tool_use`
+  - Schema validation failure → 422 `schema_validation_failed`
+- [x] Write integration tests in `/tests/integration/process-transcript.test.ts`:
+  - Mock Claude API tool_use responses (module-mock `@anthropic-ai/sdk`)
   - Test successful extraction returns valid schema
   - Test schema validation failure returns 422
-  - Test API failure returns 500 with error message
-- [ ] Manual test: run all 3 sample transcripts through the route, verify extracted output is correct (Sarah T, Bob L, Maria V)
-- [ ] All tests pass
-- [ ] Open PR → review → merge to `main`
+  - Test API failure returns a clear error (502 in practice; spec plan said 500 — 502 is semantically correct for upstream failures)
+- [x] Manual test: ran all 3 sample transcripts (Sarah T, Bob L, Maria V) against the live dev server; outputs match expected results below
+- [x] All tests pass (74 tests across 4 suites)
+- [x] Open PR → review → merge to `main` (PR [#4](https://github.com/dscottd7/clinical-routing-assistant/pull/4), merged 2026-04-18)
 
 ---
 
@@ -355,7 +356,7 @@
 |---|---|---|
 | 0 | Project scaffolding | ✅ Complete |
 | 1 | Types, schemas, SOP data layer | ✅ Complete |
-| 2 | LLM extraction API route | ⬜ Not started |
+| 2 | LLM extraction API route | ✅ Complete |
 | 3 | Document upload API route | ⬜ Not started |
 | 4 | Frontend shell + Phase 1 input (centered + samples + disclaimer) | ⬜ Not started |
 | 5 | Frontend Phase 2 extraction review | ⬜ Not started |
