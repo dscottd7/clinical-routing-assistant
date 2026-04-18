@@ -48,25 +48,6 @@ const BOOL_LABELS: Record<BoolFact, string> = {
   has_registered_dietician: "Registered dietician identified",
 };
 
-const SECTION_BOOLS: { title: string; fields: BoolFact[] }[] = [
-  {
-    title: "General",
-    fields: ["dental_visit_within_6_months", "has_pending_dental_work"],
-  },
-  {
-    title: "Joint",
-    fields: ["has_attempted_pt_or_exercise", "daily_opioid_use_over_3_months"],
-  },
-  {
-    title: "Bariatric",
-    fields: [
-      "has_prior_weight_loss_surgery",
-      "has_recent_endoscopy",
-      "has_registered_dietician",
-    ],
-  },
-];
-
 function confidenceBadge(confidence: Confidence) {
   const styles: Record<Confidence, string> = {
     high: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200",
@@ -214,6 +195,23 @@ export function ExtractionReview({
     updateTopLevel(key, { value, confidence: "high" } as Partial<ExtractionOutput[K]>);
   }
 
+  function renderBoolRow(field: BoolFact) {
+    const fact = extraction.facts[field];
+    return (
+      <FactRow
+        key={field}
+        label={BOOL_LABELS[field]}
+        confidence={fact.confidence}
+        evidence={fact.evidence}
+      >
+        <TriState
+          value={fact.value}
+          onChange={(v) => editFactValue(field, v)}
+        />
+      </FactRow>
+    );
+  }
+
   return (
     <div className="grid h-full grid-cols-1 md:grid-cols-[1fr_1.3fr]">
       <aside className="overflow-y-auto border-r bg-muted/30 p-6">
@@ -300,36 +298,21 @@ export function ExtractionReview({
             </FactRow>
           </div>
 
-          {/* Boolean fact sections */}
-          {SECTION_BOOLS.map((section) => (
-            <div key={section.title} className="mb-6 space-y-3">
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                {section.title}
-              </h2>
-              {section.fields.map((field) => {
-                const fact = extraction.facts[field];
-                return (
-                  <FactRow
-                    key={field}
-                    label={BOOL_LABELS[field]}
-                    confidence={fact.confidence}
-                    evidence={fact.evidence}
-                  >
-                    <TriState
-                      value={fact.value}
-                      onChange={(v) => editFactValue(field, v)}
-                    />
-                  </FactRow>
-                );
-              })}
-            </div>
-          ))}
-
-          {/* Joint: smoking status */}
+          {/* General */}
           <div className="mb-6 space-y-3">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Joint · enum
+              General
             </h2>
+            {renderBoolRow("dental_visit_within_6_months")}
+            {renderBoolRow("has_pending_dental_work")}
+          </div>
+
+          {/* Joint */}
+          <div className="mb-6 space-y-3">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              Joint
+            </h2>
+            {renderBoolRow("has_attempted_pt_or_exercise")}
             <FactRow
               label="Smoking status"
               confidence={extraction.facts.smoking_status.confidence}
@@ -353,13 +336,6 @@ export function ExtractionReview({
                 ))}
               </select>
             </FactRow>
-          </div>
-
-          {/* Joint: HbA1c */}
-          <div className="mb-6 space-y-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Joint · numeric
-            </h2>
             <FactRow
               label="HbA1c value"
               confidence={extraction.facts.hba1c_value.confidence}
@@ -394,13 +370,15 @@ export function ExtractionReview({
                 </label>
               </div>
             </FactRow>
+            {renderBoolRow("daily_opioid_use_over_3_months")}
           </div>
 
-          {/* Bariatric: prior surgery type (string) */}
+          {/* Bariatric */}
           <div className="mb-6 space-y-3">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Bariatric · detail
+              Bariatric
             </h2>
+            {renderBoolRow("has_prior_weight_loss_surgery")}
             <FactRow
               label="Prior surgery type"
               confidence={extraction.facts.prior_surgery_type.confidence}
@@ -419,6 +397,8 @@ export function ExtractionReview({
                 }
               />
             </FactRow>
+            {renderBoolRow("has_recent_endoscopy")}
+            {renderBoolRow("has_registered_dietician")}
           </div>
 
           {/* Additional notes */}
