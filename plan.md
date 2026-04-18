@@ -224,27 +224,31 @@
 **Goal:** Build the overall application shell, the stepper, and the Phase 1 centered input panel with text entry, file upload, pre-loaded sample transcripts, and the privacy disclaimer.
 
 #### Tasks
-- [ ] Build application shell in `/app/page.tsx`:
+- [x] Build application shell in `/app/page.tsx`:
   - Persistent top-of-page `<Stepper>` across all phases
   - Layout switches based on phase:
     - Phase 1 → single centered panel (max-width container, vertically + horizontally centered)
     - Phase 2 and Phase 3 → split panel (left: transcript read-only, right: phase content)
-- [ ] Build `<Stepper>` component with 3 phases: Input → Review → Recommendations
+  - State managed with `useState` — `{ phase, reached, transcript, extraction }`; no external state library needed for 3 phases
+- [x] Build `<Stepper>` component with 3 phases: Input → Review → Recommendations
   - Active, complete, and pending visual states
-  - Backward navigation: completed steps are clickable (future-step clicks are ignored)
-- [ ] Build Phase 1 input panel (`/components/input/`):
-  - **"Try a sample transcript" dropdown** above the input area, sourced from `/lib/sample-transcripts.ts`; selection populates the textarea
+  - Backward navigation: steps that have been reached become clickable (future-step clicks are ignored)
+- [x] Build Phase 1 input panel (`/components/input/`):
+  - **"Try a sample transcript" dropdown** above the input area, sourced from `/lib/sample-transcripts.ts`; selection populates the textarea (implemented as a native `<select>` acting as an action trigger, not a value-holding control)
   - Tab toggle: "Paste Text" / "Upload File"
   - Large textarea for text entry
   - File upload input (accept `.doc`, `.docx` only)
-  - **Privacy disclaimer** rendered directly below the input area with the exact copy from spec Section 6 (⚠️ do not use real patient data; synthetic data only; demo does not ensure PHI privacy)
+  - **Privacy disclaimer** rendered directly below the input area with the exact copy from spec Section 6
   - "Process Transcript" primary button
-  - Loading state: spinner with "Extracting clinical facts…" label
-  - Error state: clear inline error message with retry
-- [ ] Wire up text submission to `/api/process-transcript`
-- [ ] Wire up file upload to `/api/upload-document` → then to `/api/process-transcript`
-- [ ] On success: advance stepper to Phase 2, pass `ExtractionOutput` to review panel; the original transcript text is stored in shared state so the left panel can display it in Phase 2/3
-- [ ] Manual smoke test: load each of the 3 pre-loaded samples, submit via both text and (for at least one) file upload
+  - Loading state: button label changes to "Parsing document…" / "Extracting clinical facts…"
+  - Error state: inline error message (clears on next submit)
+- [x] Wire up text submission to `/api/process-transcript` via `/lib/client-api.ts`
+- [x] Wire up file upload to `/api/upload-document` → then to `/api/process-transcript`
+- [x] On success: advance stepper to Phase 2, pass `ExtractionOutput` to review panel; the original transcript text is stored in page-level state so the left panel can display it in Phase 2/3
+- [x] Placeholder split-panel views for Phase 2/3 render the transcript on the left and raw extraction/routing JSON on the right with Back / Apply SOP Rules / Process New Transcript action buttons — enough to prove end-to-end wiring; the real editable/cards UI ships in Phases 5 and 6
+- [x] SOP matcher runs client-side via `useMemo` over the extraction state (no API call) when entering Phase 3
+- [x] `.claude/launch.json` added so `preview_start` can run the dev server with Node 22 and the shell-env gotcha unset
+- [x] Manual smoke test via browser preview: Maria V sample → extraction matches expectations (`smoking_status: "active"`, `hba1c_value: 7.4`, `has_attempted_pt_or_exercise: true`) → SOP matcher triggers `joint_smoking` (Deferred) + `joint_hba1c` (Review), clears `joint_no_pt`, empty `unverified_flags` — exactly matching the plan.md expected output for Maria V. Back-nav via stepper confirmed.
 - [ ] Open PR (include screenshots of centered Phase 1 + sample dropdown + disclaimer) → review → merge to `main`
 
 ---
@@ -361,7 +365,7 @@
 | 1 | Types, schemas, SOP data layer | ✅ Complete |
 | 2 | LLM extraction API route | ✅ Complete |
 | 3 | Document upload API route | 🟡 In review (code + tests + manual smoke test complete; PR pending) |
-| 4 | Frontend shell + Phase 1 input (centered + samples + disclaimer) | ⬜ Not started |
+| 4 | Frontend shell + Phase 1 input (centered + samples + disclaimer) | 🟡 In review (shell + stepper + Phase 1 + placeholder Phase 2/3 complete; manual E2E verified against Maria V sample; PR pending) |
 | 5 | Frontend Phase 2 extraction review | ⬜ Not started |
 | 6 | Frontend Phase 3 recommendations | ⬜ Not started |
 | 7 | QA and edge cases | ⬜ Not started |

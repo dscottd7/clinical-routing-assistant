@@ -18,7 +18,7 @@ function makeFile(
   contents: string | Uint8Array = "fake binary contents",
 ): File {
   const data = typeof contents === "string" ? new TextEncoder().encode(contents) : contents;
-  return new File([data], name, {
+  return new File([data as BlobPart], name, {
     type: name.endsWith(".docx")
       ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       : "application/msword",
