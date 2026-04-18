@@ -1,7 +1,7 @@
 # Clinical Routing Assistant — Project Specification
 
 > **Status:** Pre-implementation
-> **Last updated:** 2026-04-16
+> **Last updated:** 2026-04-18
 > **Purpose:** Reference document for all architectural and design decisions. Update this file when decisions change during development.
 
 ---
@@ -340,6 +340,21 @@ interface RoutingOutput {
 }
 ```
 
+### 5c. Exported JSON (Phase 3 "View JSON" modal)
+
+The case-study requirement reads: *"Generate a validated JSON object containing the extracted facts and the suggested next steps for the Care Team."* The routing output alone does not satisfy this — it names `rule_id` values but does not carry the underlying per-field evidence and confidence the extraction captured.
+
+The "View JSON" modal therefore serializes **both** schemas bundled together:
+
+```typescript
+interface ExportPayload {
+  extraction: ExtractionOutput; // every fact + confidence + evidence, including nulls
+  routing: RoutingOutput;       // triggered rules, unverified flags, notes
+}
+```
+
+This keeps the two schemas independently defined and validated, while giving the care team one payload that answers both "what did the model extract?" and "what should happen next?".
+
 ---
 
 ## 6. UI Design
@@ -375,7 +390,8 @@ The stepper is visible across all phases. Steps behind the current step are clic
 - Left: transcript (read-only)
 - Right:
   - Patient name and inferred case type displayed at top
-  - Extracted facts table: each row shows field label | extracted value (editable) | confidence badge
+  - Extracted facts are grouped by **clinical domain** (General / Joint / Bariatric), not by control type — the section headings match the SOP categories so reviewers see facts in the same mental grouping the rules use
+  - Each row shows field label | extracted value (editable) | confidence badge
   - **All fields are always editable** — confidence badges are a visual cue to direct the reviewer's attention, not a permission gate.
   - **Confidence badges (visual highlighting only):**
     - `HIGH` — green badge; row has no highlight
@@ -393,16 +409,18 @@ The stepper is visible across all phases. Steps behind the current step are clic
 - Left: transcript (read-only)
 - Right:
   - Patient header: name, case type, reason for care
+  - **Extracted facts** collapsible panel (collapsed by default so triggered rules stay the headline). Shows every fact — including `null` / "Not mentioned" values — grouped by clinical domain. Required so the reviewer can see the full evidence base that produced the routing, not just the rules that fired.
   - **Triggered rules** displayed as cards, sorted by severity (critical first):
     - Severity color bar on left edge of card
     - Status badge (e.g., "DEFERRED", "HIGH COMPLEXITY")
     - Finding label and required action
+    - Human-readable rule label (e.g., "Physical therapy trial") rather than the internal rule id (`joint_no_pt`)
     - Evidence quote from transcript (collapsible)
-  - **Unverified flags** section: rules that could not be evaluated due to missing data, prompting care team to follow up
+  - **Unverified flags** section: rules that could not be evaluated due to missing data, prompting care team to follow up. Each flag is labeled with the same human-readable rule label used on the triggered cards.
   - **Additional clinical notes** section
   - **"No flags triggered"** green state if clean
   - Action bar at bottom:
-    - "View JSON" button → modal overlay with formatted JSON + copy button
+    - "View JSON" button → modal overlay with the **combined** export payload `{ extraction, routing }` (see §5c) plus a copy button
     - "Copy Summary" button → copies human-readable output to clipboard
     - "← Back to Review" button → returns to Phase 2 (preserves edits; user can correct a fact and re-run matching)
     - "Process New Transcript" button → resets to Phase 1
