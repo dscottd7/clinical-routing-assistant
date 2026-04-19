@@ -53,6 +53,7 @@ export interface UnverifiedFlag {
   reason: string;
   extracted_value: string;
   confidence: Confidence;
+  evidence: string | null;
 }
 
 export interface RoutingOutput {

@@ -274,6 +274,11 @@ export function Recommendations({ transcript, extraction, routing, onBack, onRes
                       <span className="text-xs text-muted-foreground">{ruleLabel(f.rule_id)}</span>
                     </div>
                     <p className="mt-2 text-sm">{f.reason}</p>
+                    {f.evidence && (
+                      <blockquote className="mt-2 border-l-2 border-amber-300 pl-3 text-xs italic text-muted-foreground">
+                        &ldquo;{f.evidence}&rdquo;
+                      </blockquote>
+                    )}
                     <p className="mt-1 text-xs text-muted-foreground">
                       Extracted: <span className="font-mono">{f.extracted_value}</span>
                       {" · "}confidence: {f.confidence}

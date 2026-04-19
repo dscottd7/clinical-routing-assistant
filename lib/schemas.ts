@@ -77,6 +77,7 @@ export const UnverifiedFlagSchema = z.object({
   reason: z.string(),
   extracted_value: z.string(),
   confidence: ConfidenceSchema,
+  evidence: z.string().nullable(),
 });
 
 export const RoutingOutputSchema = z.object({

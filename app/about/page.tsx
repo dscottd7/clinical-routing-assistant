@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "About · Clinical Routing Assistant",
+  title: "Strategic Brief · Clinical Routing Assistant",
   description:
-    "How the Clinical Routing Assistant uses an LLM for extraction and a deterministic matcher for SOP rule evaluation.",
+    "Strategic brief: why the Clinical Routing Assistant uses an LLM for extraction and a deterministic matcher for SOP rule evaluation.",
 };
 
 export default function AboutPage() {
@@ -14,266 +14,280 @@ export default function AboutPage() {
           <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
             ← Back to app
           </Link>
-          <span className="text-sm font-medium">About this demo</span>
+          <span className="text-sm font-medium">Strategic Brief</span>
         </div>
       </header>
 
       <main className="mx-auto max-w-3xl px-6 py-10">
-        <article className="space-y-12 text-sm leading-relaxed">
+        <article className="space-y-10 text-sm leading-relaxed">
           <section id="pitch">
             <h1 className="mb-3 text-3xl font-semibold tracking-tight">
               Clinical Routing Assistant
             </h1>
             <p className="text-lg text-muted-foreground">
-              A demo that turns an unstructured patient-intake transcript into a
-              traceable, reviewable set of clinical-routing recommendations — using an
-              LLM only for what it&apos;s good at, and nothing more.
+              A demo that converts an unstructured patient-intake transcript into a
+              traceable, reviewable set of clinical-routing recommendations — using
+              an LLM only for what LLMs are good at, and nothing more.
             </p>
           </section>
 
           <section id="problem">
             <h2 className="mb-3 text-xl font-semibold">The problem</h2>
+            <p className="mb-3">
+              Clinical navigation teams spend meaningful time turning long intake
+              calls into structured routing decisions. The work is high-leverage but
+              mechanical: pull a small set of clinical facts out of free text,
+              cross-reference them against an SOP, and act. At current volumes it&apos;s
+              tractable; at scale it&apos;s a bottleneck, and any slip (a missed HbA1c, a
+              misread smoking status) has clinical consequences downstream.
+            </p>
             <p>
-              Clinical intake calls produce long, loosely structured notes. A nurse or
-              coordinator then has to read each one, decide which Standard Operating
-              Procedures apply, and route the case. It&apos;s slow, inconsistent, and
-              each call mixes signal with noise. The prompt for this project: can an AI
-              assistant help surface the right SOP actions without pretending to
-              replace clinical judgment?
+              The question this brief answers is whether an AI assistant can compress
+              that loop without replacing clinical judgment. The answer: yes, if —
+              and only if — the AI is scoped narrowly enough that a human reviewer
+              can meaningfully audit it.
             </p>
           </section>
 
-          <section id="pipeline">
-            <h2 className="mb-3 text-xl font-semibold">How it works</h2>
-            <p className="mb-4">
-              Three phases, visible to the user as the stepper across the top:
+          <section id="approach">
+            <h2 className="mb-3 text-xl font-semibold">Approach</h2>
+            <p>
+              The pipeline has three phases, visible to the user as a stepper at the
+              top of the app. <strong>Phase 1</strong> takes a transcript (pasted
+              text or <code className="rounded bg-muted px-1">.doc</code>/<code className="rounded bg-muted px-1">.docx</code>{" "}
+              upload). <strong>Phase 2</strong> calls Claude once to extract a
+              structured <code className="rounded bg-muted px-1">ExtractionOutput</code> —
+              every SOP-relevant fact, plus confidence and a verbatim evidence quote —
+              and presents it for human review in a split panel alongside the source
+              transcript. <strong>Phase 3</strong> runs a deterministic TypeScript
+              matcher that evaluates each SOP rule against the verified facts and
+              produces the routing: triggered rules, unverified flags, and additional
+              notes, plus a combined JSON export for downstream systems.
             </p>
-            <ol className="space-y-3">
-              <li className="rounded-md border bg-card p-4">
-                <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Phase 1 — Input
-                </div>
-                Paste or upload a transcript. The user gets a clean, centered input
-                panel with sample transcripts pre-loaded for demos.
+          </section>
+
+          <section id="central">
+            <h2 className="mb-3 text-xl font-semibold">
+              Central design decision: one LLM call, deterministic rules, human in the loop
+            </h2>
+            <p className="mb-3">
+              Every design decision in this prototype traces back to a single choice:{" "}
+              <strong>
+                the LLM extracts, the rules engine decides, and a human sits between
+                them.
+              </strong>
+            </p>
+            <p className="mb-3">
+              The alternative — a single end-to-end prompt that takes a transcript
+              and returns &ldquo;here&apos;s what the care team should do&rdquo; — is
+              faster to build and demos well on cherry-picked inputs. It was rejected
+              for three reasons:
+            </p>
+            <ol className="mb-3 list-decimal space-y-2 pl-5">
+              <li>
+                <strong>Auditability.</strong> SOPs are policy. A compliance or
+                clinical-operations reviewer needs to point at the exact logic that
+                fired a rule. A prompt is not that. Hand-coded rules are.
               </li>
-              <li className="rounded-md border bg-card p-4">
-                <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Phase 2 — Extraction review
-                </div>
-                A single LLM call (Claude Sonnet 4.6) pulls a structured{" "}
-                <code className="rounded bg-muted px-1">ExtractionOutput</code> from
-                the transcript. Every field is editable; rows the model was less sure
-                about are highlighted amber/red.
+              <li>
+                <strong>Hallucination containment.</strong> If the LLM is only
+                extracting facts that are supported by evidence quotes from the
+                transcript, a reviewer can catch a fabrication in seconds. If the
+                LLM is also interpreting policy, they can&apos;t — the interpretive
+                step hides the extraction error.
               </li>
-              <li className="rounded-md border bg-card p-4">
-                <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Phase 3 — SOP matching
-                </div>
-                A pure, deterministic TypeScript function evaluates each SOP rule
-                against the (now-verified) facts and produces a routing output —
-                triggered rules, unverified flags, and additional notes. The page
-                also surfaces the full extracted-fact table (collapsed by default)
-                so the reviewer can see the evidence base behind the routing, not
-                just the rules that fired.
+              <li>
+                <strong>Change control.</strong> SOPs evolve. Editing a rule file,
+                versioning it, and writing a unit test is a normal engineering
+                workflow. Re-engineering a prompt that bundles extraction and policy
+                is not.
+              </li>
+            </ol>
+            <p>
+              The tradeoff is that the matcher has to be written and maintained by
+              hand, and the SOP is expressed as structured data rather than English.
+              That&apos;s a small, one-time engineering effort. The benefits —
+              auditability, predictability, straightforward rule evolution — compound
+              with every rule, every audit, and every model upgrade.
+            </p>
+          </section>
+
+          <section id="decisions">
+            <h2 className="mb-3 text-xl font-semibold">
+              Three design decisions worth defending
+            </h2>
+
+            <h3 className="mb-2 mt-4 text-base font-semibold">
+              1. &ldquo;Not mentioned&rdquo; is a first-class value
+            </h3>
+            <p className="mb-3">
+              Every extracted fact has a three-part shape: a value (which can be{" "}
+              <code className="rounded bg-muted px-1">null</code>), a confidence
+              level, and an evidence quote. <code className="rounded bg-muted px-1">null</code>{" "}
+              explicitly means &ldquo;the transcript did not address this.&rdquo; The
+              matcher treats <code className="rounded bg-muted px-1">null</code>{" "}
+              differently from <code className="rounded bg-muted px-1">false</code> —
+              it flags the rule as <strong>unverified</strong> rather than clearing or
+              triggering it.
+            </p>
+            <p>
+              It&apos;s the single most important piece of the matcher. The failure
+              mode for a naive system is silently clearing a rule because the absence
+              of a &ldquo;no&rdquo; was read as a &ldquo;yes, we&apos;re fine.&rdquo;
+              Surfacing missing data explicitly — as a &ldquo;Needs follow-up&rdquo;
+              flag the care team has to close — makes the system conservative in
+              exactly the direction that matters clinically.
+            </p>
+
+            <h3 className="mb-2 mt-6 text-base font-semibold">
+              2. Confidence is a visual cue, not a gate
+            </h3>
+            <p className="mb-3">
+              Medium- and low-confidence rows are highlighted (amber / red) on the
+              review screen. Every field is still fully editable regardless of
+              confidence. Editing a value promotes its confidence to high so the
+              highlight clears and the reviewer&apos;s attention moves on.
+            </p>
+            <p>
+              This deliberately resists the pattern of &ldquo;block the user until
+              they confirm&rdquo; workflows. Confidence directs attention; it
+              doesn&apos;t create friction. The reviewer is trusted to catch things;
+              the UI just helps them look in the right places first.
+            </p>
+
+            <h3 className="mb-2 mt-6 text-base font-semibold">
+              3. Evidence is preserved through the entire pipeline
+            </h3>
+            <p>
+              The LLM captures a verbatim quote for each fact. That quote rides along
+              into Phase 2 (visible under the field) and into Phase 3 — under each
+              triggered rule <em>and</em> under each unverified flag, so the reviewer
+              can see why the LLM was uncertain, not just that it was. A reviewer
+              never has to toggle back to the transcript to check the model&apos;s
+              work; the receipts are attached to the claim.
+            </p>
+          </section>
+
+          <section id="output">
+            <h2 className="mb-3 text-xl font-semibold">What the care team receives</h2>
+            <p className="mb-3">Phase 3 produces two artifacts:</p>
+            <ul className="mb-3 list-disc space-y-1 pl-5">
+              <li>
+                A <strong>human-readable summary</strong> that can be copied straight
+                into a chart note.
+              </li>
+              <li>
+                A <strong>validated JSON export</strong> containing both the extracted
+                facts (including the &ldquo;not mentioned&rdquo; ones) and the routing
+                output. One payload answers both halves of the requirement —{" "}
+                <em>what did the model extract, and what should happen next</em> —
+                without collapsing them into a single flat shape.
+              </li>
+            </ul>
+            <p>
+              The two halves are kept schema-distinct because they have different
+              owners. The extraction schema is owned by the model and the reviewer;
+              the routing schema is owned by the rules engine and the care team. A
+              downstream integration can consume either one independently.
+            </p>
+          </section>
+
+          <section id="metrics">
+            <h2 className="mb-3 text-xl font-semibold">
+              How we&apos;d measure this in production
+            </h2>
+            <p className="mb-3">
+              If this were to move towards a production application, we&apos;d want
+              to measure:
+            </p>
+            <ul className="mb-3 list-disc space-y-2 pl-5">
+              <li>
+                <strong>Extraction precision/recall per fact</strong>, measured
+                against reviewer edits. If{" "}
+                <code className="rounded bg-muted px-1">smoking_status</code> flips
+                from <code className="rounded bg-muted px-1">never</code> to{" "}
+                <code className="rounded bg-muted px-1">active</code> during review
+                20% of the time, the prompt or model needs work — not the rule.
+              </li>
+              <li>
+                <strong>Reviewer time per case</strong>, baseline vs. tool-assisted.
+                The entire value proposition is throughput.
+              </li>
+              <li>
+                <strong>Unverified-flag close rate and time-to-close</strong>, because
+                that bucket is the care team&apos;s real inbox.
+              </li>
+              <li>
+                <strong>Rule-firing distribution</strong>, to catch drift. If{" "}
+                <code className="rounded bg-muted px-1">joint_no_pt</code> suddenly
+                fires on 60% of joint cases, something upstream changed.
+              </li>
+              <li>
+                <strong>Post-hoc clinical agreement</strong>, sampled. Does a
+                clinician reviewing a random 5% of routings agree with the tool?
+                That&apos;s the ground truth the other metrics approximate.
+              </li>
+            </ul>
+            <p>
+              None of these require new infrastructure the tool doesn&apos;t already
+              have — every routing decision is already a structured object with the
+              evidence attached.
+            </p>
+          </section>
+
+          <section id="roadmap">
+            <h2 className="mb-3 text-xl font-semibold">Scope and roadmap</h2>
+            <p className="mb-3">
+              This is a v1 prototype. The explicit choices about what{" "}
+              <em>not</em> to build:
+            </p>
+            <ul className="mb-3 list-disc space-y-2 pl-5">
+              <li>
+                <strong>No persistence, auth, or audit log.</strong> A production
+                deployment needs all three; they&apos;re orthogonal to the
+                extraction-and-routing thesis and would triple the scope.
+              </li>
+              <li>
+                <strong>No PHI protections.</strong> The app displays an explicit
+                disclaimer. This is a demo, not a HIPAA-ready system.
+              </li>
+              <li>
+                <strong>Eight SOP rules, hand-coded.</strong> A real deployment would
+                want a separate governance surface for rule changes, reviewed and
+                versioned independently of the app.
+              </li>
+              <li>
+                <strong>No LLM-assisted reasoning for ambiguous cases.</strong> If the
+                extraction is uncertain, today&apos;s behavior is to flag and
+                escalate. A future iteration could add an optional LLM reasoning step —{" "}
+                <em>after</em> human review — to suggest a resolution with
+                justification. Deliberately out of scope for v1 so the deterministic
+                story stays clean.
+              </li>
+            </ul>
+            <p className="mb-2">Next things to build, in order:</p>
+            <ol className="list-decimal space-y-2 pl-5">
+              <li>
+                <strong>Reviewer-edit telemetry.</strong> Passive logging of which
+                fields get edited most often — the fastest path to a better extraction
+                prompt.
+              </li>
+              <li>
+                <strong>Optional post-review LLM reasoning step</strong> for cases
+                with multiple unverified flags, producing a draft escalation note for
+                the care team to edit.
               </li>
             </ol>
           </section>
 
-          <section id="design">
-            <h2 className="mb-3 text-xl font-semibold">
-              Why only one LLM call
-            </h2>
-            <p className="mb-3">
-              The core design choice: the LLM extracts, the rules engine decides.
-              Nothing else.
-            </p>
-            <p className="mb-3">
-              SOP rules are the kind of thing a compliance team needs to audit. If a
-              rule fires, you want to be able to point at the exact line of code that
-              fired it. Asking an LLM to &ldquo;recommend a routing&rdquo; would fold
-              extraction, interpretation, and policy into a single opaque step. That
-              might work more often than not — but &ldquo;more often than not&rdquo;
-              isn&apos;t the bar for a clinical workflow.
-            </p>
-            <p>
-              By contrast, a handwritten matcher is trivially auditable, testable, and
-              deterministic — the same facts always produce the same recommendations.
-              The only probabilistic surface is the extraction step, where the human
-              reviewer sees every value before rules run.
-            </p>
-          </section>
-
-          <section id="facts">
-            <h2 className="mb-3 text-xl font-semibold">The fact model</h2>
-            <p className="mb-3">
-              Every extracted value carries three pieces of information, not one:
-            </p>
-            <pre className="overflow-x-auto rounded-md border bg-muted/50 p-3 font-mono text-xs">
-{`interface ExtractedFact<T> {
-  value: T | null;           // null = "not mentioned"
-  confidence: "high" | "medium" | "low";
-  evidence: string | null;   // direct quote from the transcript
-}`}
-            </pre>
-            <p className="mt-3">
-              Two things make this shape load-bearing. First,{" "}
-              <strong>&ldquo;not mentioned&rdquo; is a first-class value</strong> — a
-              missing data point is different from a false one, and the rule engine
-              treats them differently (see below). Second, every value is paired with
-              its source quote, so the reviewer can verify the model in one glance.
-            </p>
-          </section>
-
-          <section id="rule-example">
-            <h2 className="mb-3 text-xl font-semibold">A rule, end to end</h2>
-            <p className="mb-3">
-              SOPs are hand-coded as data. Here&apos;s the smoking rule for joint
-              cases:
-            </p>
-            <pre className="overflow-x-auto rounded-md border bg-muted/50 p-3 font-mono text-xs">
-{`{
-  id: "joint_smoking",
-  category: "Joint",
-  applies_to: ["joint"],
-  finding: "Active smoker or quit within last 3 months",
-  fact_fields: ["smoking_status"],
-  status: "Deferred",
-  action: "Refer to Smoking Cessation education/support; pause case for 3 months.",
-  severity: "critical"
-}`}
-            </pre>
-            <p className="mt-3">
-              The matcher reads <code className="rounded bg-muted px-1">fact_fields</code>,
-              pulls the matching values off the extraction, and decides: trigger, clear,
-              or flag as unverified. No LLM sees this rule.
-            </p>
-          </section>
-
-          <section id="classification">
-            <h2 className="mb-3 text-xl font-semibold">
-              Triggered, Cleared, Unverified
-            </h2>
-            <p className="mb-3">Every rule lands in exactly one bucket:</p>
-            <div className="overflow-x-auto rounded-md border">
-              <table className="w-full text-xs">
-                <thead className="bg-muted/50">
-                  <tr>
-                    <th className="px-3 py-2 text-left font-semibold">Outcome</th>
-                    <th className="px-3 py-2 text-left font-semibold">Condition</th>
-                    <th className="px-3 py-2 text-left font-semibold">Behavior</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  <tr>
-                    <td className="px-3 py-2 font-medium">Triggered</td>
-                    <td className="px-3 py-2">
-                      All referenced fact fields are non-null <em>and</em> the rule
-                      condition is satisfied
-                    </td>
-                    <td className="px-3 py-2">Shown as a severity-colored rule card</td>
-                  </tr>
-                  <tr>
-                    <td className="px-3 py-2 font-medium">Cleared</td>
-                    <td className="px-3 py-2">
-                      All fields non-null <em>and</em> condition not satisfied
-                    </td>
-                    <td className="px-3 py-2">Omitted from output (success = silent)</td>
-                  </tr>
-                  <tr>
-                    <td className="px-3 py-2 font-medium">Unverified</td>
-                    <td className="px-3 py-2">
-                      One or more referenced field is null
-                    </td>
-                    <td className="px-3 py-2">
-                      Shown as a &ldquo;Needs follow-up&rdquo; flag with the reason and
-                      the extracted value
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <p className="mt-3">
-              Unverified is the interesting bucket — it means the transcript didn&apos;t
-              contain the information the rule needs. The reviewer either fills it in
-              (and re-runs matching) or escalates to the care team.
-            </p>
-          </section>
-
-          <section id="export">
-            <h2 className="mb-3 text-xl font-semibold">What the care team gets</h2>
-            <p className="mb-3">
-              Phase 3 exposes two outputs. A human-readable summary that can be
-              copied straight into a chart note, and a{" "}
-              <strong>&ldquo;View JSON&rdquo;</strong> modal that exports a single
-              validated payload:
-            </p>
-            <pre className="overflow-x-auto rounded-md border bg-muted/50 p-3 font-mono text-xs">
-{`{
-  "extraction": { /* every fact + confidence + evidence, including nulls */ },
-  "routing":    { /* triggered rules, unverified flags, additional notes */ }
-}`}
-            </pre>
-            <p className="mt-3">
-              The case-study brief asks for &ldquo;a validated JSON object
-              containing the extracted facts and the suggested next steps.&rdquo;
-              Bundling both schemas in one payload answers both halves of that
-              question — what the model saw, and what should happen next — without
-              conflating them into a single flat shape.
-            </p>
-          </section>
-
-          <section id="review">
-            <h2 className="mb-3 text-xl font-semibold">
-              Confidence &amp; the review workflow
-            </h2>
-            <p className="mb-3">
-              Medium-confidence rows are highlighted amber, low-confidence rows red.
-              The reviewer can edit any value, and the moment they do, that fact&apos;s
-              confidence is promoted to <code className="rounded bg-muted px-1">high</code>{" "}
-              and the highlight clears. The evidence quote is preserved so the
-              correction stays traceable.
-            </p>
-            <p>
-              Clicking &ldquo;Apply SOP Rules&rdquo; runs the matcher against the edited
-              extraction. Clicking &ldquo;Back to Review&rdquo; from the
-              recommendations screen returns to Phase 2 with edits intact — so a user
-              who discovers a misextracted fact mid-review can correct it and re-run
-              without starting over.
-            </p>
-          </section>
-
-          <section id="limitations">
-            <h2 className="mb-3 text-xl font-semibold">Limitations &amp; privacy</h2>
-            <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
-              <li>
-                Demo only — synthetic transcripts. Do not paste real PHI.
-              </li>
-              <li>
-                No audit log, no persistence, no authentication. Every session starts
-                empty.
-              </li>
-              <li>
-                The SOP rule set is a hand-picked subset, not an exhaustive policy. A
-                real deployment would version and govern the rule list separately.
-              </li>
-              <li>
-                Extraction accuracy is bounded by the underlying model. The reviewer
-                is the final check.
-              </li>
-            </ul>
-          </section>
-
           <section id="stack">
             <h2 className="mb-3 text-xl font-semibold">Tech stack</h2>
-            <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
-              <li>Next.js 16 App Router, React 19, TypeScript strict mode</li>
-              <li>Claude Sonnet 4.6 via the Anthropic SDK for extraction</li>
-              <li>Zod for LLM output validation</li>
-              <li>mammoth.js for .doc/.docx ingest</li>
-              <li>Tailwind CSS v4 + base-ui / shadcn-style primitives</li>
-              <li>Jest 30 for integration and unit tests (81 passing)</li>
-              <li>Deployed on Vercel</li>
-            </ul>
+            <p className="text-muted-foreground">
+              Next.js 16 App Router, React 19, TypeScript strict, Claude Sonnet 4.6
+              via the Anthropic SDK, Zod for LLM output validation, mammoth.js for
+              document ingest, Tailwind CSS v4, Jest 30 for unit and integration
+              tests. Deployed on Vercel.
+            </p>
           </section>
 
           <section id="back" className="pt-4">

@@ -213,6 +213,7 @@ describe("RoutingOutputSchema", () => {
           reason: "PT history not established.",
           extracted_value: "has_attempted_pt_or_exercise: not mentioned",
           confidence: "low",
+          evidence: null,
         },
       ],
     };

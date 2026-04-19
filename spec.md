@@ -480,13 +480,11 @@ If a sample appears to "defeat" a planned test case (for example, the Bob L tran
 
 ---
 
-## 9b. Planned Enhancement — LLM Evidence in Unverified Flags
+## 9b. LLM Evidence in Unverified Flags
 
-`UnverifiedFlag` currently surfaces a deterministic `reason` string built from field labels (e.g., "physical therapy or exercise history not mentioned in transcript"). The richer **`evidence`** quote captured by the LLM during extraction (e.g., "I went to the gym a couple of times") is dropped on the floor when the field's `value` is `null`.
+`UnverifiedFlag` now carries an `evidence: string | null` field. When the extractor captures a quote that explains *why* a fact was uncertain (e.g., "I went to the gym a couple of times" for an ambiguous PT history), the matcher threads that quote through to the flag and the Phase 3 UI renders it under the "Needs follow-up" card. The reviewer sees why the LLM was uncertain, not just that it was uncertain — the main point of the unverified bucket.
 
-**Enhancement (post-v1):** Carry the LLM `evidence` quote through to `UnverifiedFlag` — either appended to `reason` or as a new optional `evidence: string | null` field — so the reviewer sees *why* the LLM was uncertain, not just *that* it was uncertain. This materially improves the human-review loop for ambiguous facts (which is the entire purpose of the unverified bucket) without changing the deterministic matching behavior.
-
-Tracked here so it's not lost; not in scope for the current phase.
+Evidence precedence in the matcher: quotes from the null fact fields (the ambiguous ones) are preferred; if none, any non-null field quotes from the rule are used; otherwise `null`. The deterministic matching behavior itself is unchanged.
 
 ---
 
