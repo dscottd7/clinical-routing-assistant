@@ -82,6 +82,37 @@ function getFactField(
   };
 }
 
+// ── Human-readable labels ────────────────────────────────────────────────────
+
+const FIELD_LABELS: Record<string, string> = {
+  dental_visit_within_6_months: "dental visit recency",
+  has_pending_dental_work: "pending dental work",
+  smoking_status: "smoking status",
+  has_attempted_pt_or_exercise: "physical therapy or exercise history",
+  hba1c_value: "HbA1c value",
+  daily_opioid_use_over_3_months: "daily opioid use duration",
+  has_prior_weight_loss_surgery: "prior weight-loss surgery history",
+  prior_surgery_type: "prior surgery type",
+  has_recent_endoscopy: "recent endoscopy (EGD)",
+  has_registered_dietician: "registered dietician status",
+};
+
+const SMOKING_STATUS_LABELS: Record<string, string> = {
+  active: "Active",
+  quit_within_3_months: "Quit within last 3 months",
+  quit_over_3_months: "Quit over 3 months ago",
+  never: "Never",
+};
+
+function formatFieldValue(field: string, value: unknown): string {
+  if (value === null || value === undefined) return "not mentioned";
+  if (field === "smoking_status" && typeof value === "string") {
+    return SMOKING_STATUS_LABELS[value] ?? value;
+  }
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  return String(value);
+}
+
 // ── Human-readable unverified reason builder ─────────────────────────────────
 
 function buildUnverifiedReason(
@@ -89,26 +120,13 @@ function buildUnverifiedReason(
   nullFields: string[],
   extraction: ExtractionOutput,
 ): string {
-  const fieldLabels: Record<string, string> = {
-    dental_visit_within_6_months: "dental visit recency",
-    has_pending_dental_work: "pending dental work",
-    smoking_status: "smoking status",
-    has_attempted_pt_or_exercise: "physical therapy or exercise history",
-    hba1c_value: "HbA1c value",
-    daily_opioid_use_over_3_months: "daily opioid use duration",
-    has_prior_weight_loss_surgery: "prior weight-loss surgery history",
-    prior_surgery_type: "prior surgery type",
-    has_recent_endoscopy: "recent endoscopy (EGD)",
-    has_registered_dietician: "registered dietician status",
-  };
-
   // For general_dental, either null field alone is enough to be unverified
   if (rule.id === "general_dental") {
-    const missing = nullFields.map((f) => fieldLabels[f] ?? f).join(" and ");
+    const missing = nullFields.map((f) => FIELD_LABELS[f] ?? f).join(" and ");
     return `Cannot evaluate dental clearance rule: ${missing} not mentioned in transcript.`;
   }
 
-  const missing = nullFields.map((f) => fieldLabels[f] ?? f).join(", ");
+  const missing = nullFields.map((f) => FIELD_LABELS[f] ?? f).join(", ");
   return `Cannot evaluate rule "${rule.finding}" because the following information was not clearly established: ${missing}. Clinician must verify before proceeding.`;
 }
 
@@ -122,8 +140,9 @@ function formatExtractedValue(
   for (const field of rule.fact_fields) {
     const fact = getFactField(extraction, field);
     if (!fact) continue;
-    const valueStr = fact.value === null ? "not mentioned" : String(fact.value);
-    parts.push(`${field}: ${valueStr}`);
+    const label = FIELD_LABELS[field] ?? field;
+    const capitalized = label.charAt(0).toUpperCase() + label.slice(1);
+    parts.push(`${capitalized}: ${formatFieldValue(field, fact.value)}`);
   }
   return parts.join("; ");
 }
