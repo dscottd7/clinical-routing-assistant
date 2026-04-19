@@ -298,6 +298,32 @@ describe("joint_no_pt", () => {
     });
     expectUnverified(runSopMatcher(extraction), "joint_no_pt");
   });
+
+  it("threads the LLM evidence quote through to the unverified flag", () => {
+    const extraction = baseExtraction({
+      facts: {
+        ...baseExtraction().facts,
+        has_attempted_pt_or_exercise: {
+          value: null,
+          confidence: "low",
+          evidence: "I went to the gym a couple of times",
+        },
+      },
+    });
+    const flag = expectUnverified(runSopMatcher(extraction), "joint_no_pt");
+    expect(flag.evidence).toBe("I went to the gym a couple of times");
+  });
+
+  it("leaves evidence null when no quote was captured", () => {
+    const extraction = baseExtraction({
+      facts: {
+        ...baseExtraction().facts,
+        has_attempted_pt_or_exercise: nullFact(),
+      },
+    });
+    const flag = expectUnverified(runSopMatcher(extraction), "joint_no_pt");
+    expect(flag.evidence).toBeNull();
+  });
 });
 
 // ── joint_hba1c ───────────────────────────────────────────────────────────────

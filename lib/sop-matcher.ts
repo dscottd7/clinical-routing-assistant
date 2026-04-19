@@ -169,11 +169,24 @@ export function runSopMatcher(
         extraction,
         rule.fact_fields[0],
       );
+      // Collect any evidence quotes the LLM captured from this rule's fact
+      // fields. Prefer evidence from the null fields (the ambiguous ones —
+      // that's why the flag exists); fall back to any non-null field evidence.
+      const nullFieldQuotes = nullFields
+        .map((f) => getFactField(extraction, f)?.evidence)
+        .filter((e): e is string => typeof e === "string" && e.length > 0);
+      const nonNullFieldQuotes = rule.fact_fields
+        .filter((f) => !nullFields.includes(f))
+        .map((f) => getFactField(extraction, f)?.evidence)
+        .filter((e): e is string => typeof e === "string" && e.length > 0);
+      const quotes = nullFieldQuotes.length > 0 ? nullFieldQuotes : nonNullFieldQuotes;
+      const evidence = quotes.length > 0 ? quotes.join(" · ") : null;
       unverifiedFlags.push({
         rule_id: rule.id,
         reason: buildUnverifiedReason(rule, nullFields, extraction),
         extracted_value: formatExtractedValue(rule, extraction),
         confidence: representativeFact?.confidence ?? "low",
+        evidence,
       });
       continue;
     }

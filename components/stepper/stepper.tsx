@@ -24,7 +24,7 @@ export function Stepper({ current, reached, onNavigate }: StepperProps) {
         href="/about"
         className="absolute right-6 top-1/2 hidden -translate-y-1/2 text-sm text-muted-foreground hover:text-foreground sm:block"
       >
-        About this demo
+        Strategic Brief
       </Link>
       <ol className="mx-auto flex max-w-5xl items-center justify-center gap-2 sm:gap-4">
         {STEPS.map((step, idx) => {

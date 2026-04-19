@@ -42,6 +42,7 @@ export function formatSummary(routing: RoutingOutput): string {
     lines.push("Unverified flags (needs care-team follow-up):");
     for (const f of routing.unverified_flags) {
       lines.push(`  - ${ruleLabel(f.rule_id)}: ${f.reason}`);
+      if (f.evidence) lines.push(`      Evidence: "${f.evidence}"`);
       lines.push(`      Extracted: ${f.extracted_value} (confidence: ${f.confidence})`);
     }
   }
