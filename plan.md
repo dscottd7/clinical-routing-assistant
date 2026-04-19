@@ -399,7 +399,8 @@
 
 ## Planned Enhancements (Post-v1)
 
-- **Surface LLM evidence in `UnverifiedFlag`.** Today the matcher builds a deterministic `reason` string from field labels but discards the LLM `evidence` quote when a fact's `value` is `null`. Carrying that quote through (appended to `reason`, or as a new optional `evidence` field) would let reviewers see *why* the LLM was uncertain — e.g., "I went to the gym a couple of times" alongside the `joint_no_pt` flag. See spec Section 9b.
+- **Surface LLM evidence in `UnverifiedFlag`.** ✅ Shipped in `feat/unverified-evidence` — `UnverifiedFlag.evidence` now carries the LLM's quote through to the UI blockquote on each unverified card.
+- **Human-readable labels in unverified card `extracted_value`.** ✅ Shipped in `fix/unverified-human-labels` — matcher renders `"Physical therapy or exercise history: not mentioned"` instead of the raw `has_attempted_pt_or_exercise` field name.
 
 ---
 
