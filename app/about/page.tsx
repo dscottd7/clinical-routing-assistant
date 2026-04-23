@@ -35,16 +35,16 @@ export default function AboutPage() {
             <h2 className="mb-3 text-xl font-semibold">The problem</h2>
             <p className="mb-3">
               Clinical navigation teams spend meaningful time turning long intake
-              calls into structured routing decisions. The work is high-leverage but
+              calls into structured routing decisions. The work is critical but
               mechanical: pull a small set of clinical facts out of free text,
-              cross-reference them against an SOP, and act. At current volumes it&apos;s
-              tractable; at scale it&apos;s a bottleneck, and any slip (a missed HbA1c, a
-              misread smoking status) has clinical consequences downstream.
+              cross-reference them against an SOP, and act. At scale this is a bottleneck, 
+              and any slip (a missed HbA1c, a
+              misread smoking status) has consequences downstream.
             </p>
             <p>
               The question this brief answers is whether an AI assistant can compress
-              that loop without replacing clinical judgment. The answer: yes, if —
-              and only if — the AI is scoped narrowly enough that a human reviewer
+              that loop, create efficiency, and reduce errors without replacing human judgment. 
+              The answer: yes, if the AI is scoped narrowly enough that a human reviewer
               can meaningfully audit it.
             </p>
           </section>
@@ -71,23 +71,23 @@ export default function AboutPage() {
               Central design decision: one LLM call, deterministic rules, human in the loop
             </h2>
             <p className="mb-3">
-              Every design decision in this prototype traces back to a single choice:{" "}
+              The key design decision in this prototype traces back to a single choice:{" "}
               <strong>
-                the LLM extracts, the rules engine decides, and a human sits between
+                the LLM extracts, the programmatic rules engine decides, and a human sits between
                 them.
               </strong>
             </p>
             <p className="mb-3">
-              The alternative — a single end-to-end prompt that takes a transcript
+              Alternatively, a single end-to-end prompt that takes a transcript
               and returns &ldquo;here&apos;s what the care team should do&rdquo; — is
-              faster to build and demos well on cherry-picked inputs. It was rejected
+              faster to build and may demo well, but it was rejected in this prototype 
               for three reasons:
             </p>
             <ol className="mb-3 list-decimal space-y-2 pl-5">
               <li>
                 <strong>Auditability.</strong> SOPs are policy. A compliance or
                 clinical-operations reviewer needs to point at the exact logic that
-                fired a rule. A prompt is not that. Hand-coded rules are.
+                fired a rule. A prompt is not that. Programmatically coded rules are.
               </li>
               <li>
                 <strong>Hallucination containment.</strong> If the LLM is only
@@ -114,14 +114,14 @@ export default function AboutPage() {
 
           <section id="decisions">
             <h2 className="mb-3 text-xl font-semibold">
-              Three design decisions worth defending
+              Three design decisions worth mentioning
             </h2>
 
             <h3 className="mb-2 mt-4 text-base font-semibold">
               1. &ldquo;Not mentioned&rdquo; is a first-class value
             </h3>
             <p className="mb-3">
-              Every extracted fact has a three-part shape: a value (which can be{" "}
+              Every extracted fact has three components: a value (which can be{" "}
               <code className="rounded bg-muted px-1">null</code>), a confidence
               level, and an evidence quote. <code className="rounded bg-muted px-1">null</code>{" "}
               explicitly means &ldquo;the transcript did not address this.&rdquo; The
@@ -140,7 +140,7 @@ export default function AboutPage() {
             </p>
 
             <h3 className="mb-2 mt-6 text-base font-semibold">
-              2. Confidence is a visual cue, not a gate
+              2. Confidence level is a visual cue, not a gate
             </h3>
             <p className="mb-3">
               Medium- and low-confidence rows are highlighted (amber / red) on the
@@ -151,7 +151,7 @@ export default function AboutPage() {
             <p>
               This deliberately resists the pattern of &ldquo;block the user until
               they confirm&rdquo; workflows. Confidence directs attention; it
-              doesn&apos;t create friction. The reviewer is trusted to catch things;
+              doesn&apos;t create friction. The reviewer is trusted to catch errors;
               the UI just helps them look in the right places first.
             </p>
 
@@ -164,7 +164,7 @@ export default function AboutPage() {
               triggered rule <em>and</em> under each unverified flag, so the reviewer
               can see why the LLM was uncertain, not just that it was. A reviewer
               never has to toggle back to the transcript to check the model&apos;s
-              work; the receipts are attached to the claim.
+              work.
             </p>
           </section>
 
@@ -211,7 +211,7 @@ export default function AboutPage() {
               </li>
               <li>
                 <strong>Reviewer time per case</strong>, baseline vs. tool-assisted.
-                The entire value proposition is throughput.
+                The value proposition presumes meaningful efficiency gains.
               </li>
               <li>
                 <strong>Unverified-flag close rate and time-to-close</strong>, because
