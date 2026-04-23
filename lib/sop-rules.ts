@@ -60,7 +60,7 @@ export const SOP_RULES: SopRule[] = [
     fact_fields: ["has_prior_weight_loss_surgery"],
     status: "Revision",
     action: "Flag as Revision Case; requires specialized surgical review.",
-    severity: "info",
+    severity: "warning",
   },
   {
     id: "bariatric_no_egd",

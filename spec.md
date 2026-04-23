@@ -123,8 +123,7 @@ SOPs are hardcoded as a structured array of rule objects. Each rule has a define
 |---|---|---|
 | `critical` | Red | `Ineligible`, `Deferred` |
 | `high` | Orange | `High Complexity` |
-| `warning` | Yellow | `Action Required`, `Hold`, `Review` |
-| `info` | Blue | `Revision` |
+| `warning` | Yellow | `Action Required`, `Hold`, `Review`, `Revision` |
 | `clear` | Green | No rules triggered |
 
 ### Rule Set (v1 — 8 rules)
@@ -189,7 +188,7 @@ const SOP_RULES = [
     fact_fields: ["has_prior_weight_loss_surgery"],
     status: "Revision",
     action: "Flag as Revision Case; requires specialized surgical review.",
-    severity: "info"
+    severity: "warning"
   },
   {
     id: "bariatric_no_egd",

@@ -47,6 +47,24 @@ Open http://localhost:3000.
 
 ---
 
+## SOP Rules & Severity
+
+Eight rules are evaluated per transcript, grouped by case type (bariatric / joint / general). Each rule produces one of three outcomes: **Triggered**, **Unverified** (transcript was ambiguous — follow-up required), or **Cleared** (silent).
+
+Triggered rules are displayed by severity:
+
+| Severity | Color | Rules |
+|---|---|---|
+| `critical` | Red | `joint_smoking`, `joint_no_pt` |
+| `high` | Orange | `joint_opioid` |
+| `warning` | Yellow | `general_dental`, `joint_hba1c`, `bariatric_revision`, `bariatric_no_egd`, `bariatric_no_rd` |
+
+`bariatric_revision` is `warning` (not `info`) because flagging a patient as a revision case redirects them to a specialized surgical pathway — this is a routing-critical finding, not merely informational.
+
+Rules are defined in [`lib/sop-rules.ts`](./lib/sop-rules.ts). See [`spec.md`](./spec.md) §4 for the full rule set and trigger logic.
+
+---
+
 ## Project Structure
 
 ```
